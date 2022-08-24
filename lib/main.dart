@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+
+import 'screens/HomeScreen.dart';
+
+class Store extends ChangeNotifier {
+  int _data1 = 0;
+  int get data1 => _data1;
+  void setData1(int data1) {
+    _data1 = data1;
+  } //ef
+
+} //ec
+
 main() {
   return runApp(
-    MaterialApp(
-      home: HomePage(),
+    ChangeNotifierProvider(
+      create: (BuildContext context) => Store(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: HomeScreen(),
+      ),
     ),
   );
 } //ef
-
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      //appBar
-      appBar: AppBar(title: const Text("AppBar"), actions: []),
-      //body
-      body: Container(),
-    );
-  } //ef
-
-}//ec
