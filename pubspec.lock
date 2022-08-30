@@ -57,6 +57,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
+  date_picker_timeline:
+    dependency: "direct main"
+    description:
+      name: date_picker_timeline
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.3"
+  drop_down_list:
+    dependency: "direct main"
+    description:
+      name: drop_down_list
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.3"
+  dropdown_plus:
+    dependency: "direct main"
+    description:
+      name: dropdown_plus
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.9"
   easy_localization:
     dependency: "direct main"
     description:
