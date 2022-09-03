@@ -80,4 +80,9 @@ class Status {
     }
     return null;
   } //ef
+
+  static List<String> getStatusTypes() {
+    List<String> statusTypes = statuses.map((e) => e.status).toList();
+    return statusTypes;
+  } //ef
 }

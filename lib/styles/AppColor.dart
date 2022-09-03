@@ -7,4 +7,5 @@ class AppColor {
   static const primaryYellow = Color.fromARGB(255, 245, 195, 124);
   static const white = Color.fromARGB(255, 255, 255, 255);
   static const black = Color.fromARGB(255, 66, 66, 66);
+  static const grey = Color.fromARGB(255, 234, 236, 241);
 }//ec

@@ -121,7 +121,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               children: [
                                 const Text(
                                   "Start Date",
-                                  style: AppStyle.subHeading,
+                                  style: AppStyle.subHeading_l,
                                 ),
                                 GestureDetector(
                                   onTap: () async {
@@ -188,7 +188,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               children: [
                                 const Text(
                                   "Deadline",
-                                  style: AppStyle.subHeading,
+                                  style: AppStyle.subHeading_l,
                                 ),
                                 GestureDetector(
                                   onTap: () async {

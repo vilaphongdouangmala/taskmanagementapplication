@@ -6,8 +6,13 @@ class AppStyle {
   //padding
   static double defaultPadding = 25;
 
-  //formats
+  //main formats
   static DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
+  static const pagePopText = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: AppColor.primaryColor,
+  );
 
   //headings
   static const mainHeading = TextStyle(
@@ -15,9 +20,14 @@ class AppStyle {
     fontSize: 24,
     color: AppColor.white,
   );
-  static const subHeading = TextStyle(
+  static const subHeading_l = TextStyle(
     fontSize: 18,
     color: AppColor.black,
+  );
+  static const subHeading_b = TextStyle(
+    fontSize: 18,
+    color: AppColor.black,
+    fontWeight: FontWeight.bold,
   );
 
   //create task screen

@@ -7,25 +7,46 @@ import 'package:http/http.dart' as http;
 import 'package:task_management_application/models/Employee.dart';
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
+import 'package:collection/collection.dart';
 
 import 'models/Status.dart';
 import 'models/Task.dart';
 import 'screens/HomeScreen.dart';
 
 class Store extends ChangeNotifier {
-  String connectionUrl = "http://192.168.183.189:1880/taskmanagement";
+  String connectionUrl = "http://192.168.183.41:1880";
 
   //employees
   List<Employee> _employees = [];
   List<Employee> get employees => _employees;
 
+  //available employees
+  List<Employee> _availableEmployees = [];
+  List<Employee> get availableEmployees => _availableEmployees;
+
+  //displayedEmployees
+  List<Employee> _displayedEmployees = [];
+  List<Employee> get displayedEmployees => _displayedEmployees;
+
+  //tasks
+  List<Task> _tasks = [];
+  List<Task> get tasks => _tasks;
+
+  //displayed tasks
+  List<Task> _displayedTasks = [];
+  List<Task> get displayedTasks => _displayedTasks;
+
   void setEmployees(List<Employee> employees) {
     _employees = employees;
   } //ef
 
+  void setDisplayedEmployees(List<Employee> displayedEmployees) {
+    _displayedEmployees = displayedEmployees;
+  }
+
   Future<List<Employee>> getEmployees() async {
     if (_employees.isEmpty) {
-      var url = connectionUrl;
+      var url = "$connectionUrl/getEmployees";
       var jsonText = await get(url);
       var dict = json.decode(jsonText) as List;
       List<Employee> employees = dict.map((e) => Employee.fromMap(e)).toList();
@@ -36,11 +57,20 @@ class Store extends ChangeNotifier {
     return _employees;
   } //ef
 
-  //end employee region
+  void setAvailableEmployees(List<Employee> employees) {
+    _availableEmployees = employees;
+  }
 
-  //tasks
-  List<Task> _tasks = [];
-  List<Task> get tasks => _tasks;
+  void getAvailableEmployees(List<Employee> assignedPeople) {
+    _availableEmployees.clear();
+    for (Employee employee in _employees) {
+      //if employee is not in the assignedPeople list, we show those employees (they are available)
+      if (assignedPeople.firstWhereOrNull((e) => e.id == employee.id) == null) {
+        _availableEmployees.add(employee);
+      } //end if
+    } //end loop
+  } //ef
+  //end employee region
 
   void setTasks(List<Task> tasks) {
     _tasks = tasks;
@@ -48,8 +78,8 @@ class Store extends ChangeNotifier {
 
   Future<List<Task>> getTasks({refresh = false}) async {
     if (_tasks.isEmpty || refresh) {
-      var url = connectionUrl;
-      var jsonText = await get(connectionUrl);
+      var url = "$connectionUrl/getTasks";
+      var jsonText = await get(url);
       var dict = json.decode(jsonText) as List;
       List<Task> tasks = dict.map((e) => Task.fromMap(e)).toList();
       setTasks(tasks);
@@ -60,10 +90,6 @@ class Store extends ChangeNotifier {
   } //ef
 
   //end task region
-
-  //displayed tasks
-  List<Task> _displayedTasks = [];
-  List<Task> get displayedTasks => _displayedTasks;
 
   void setDisplayedTasks(List<Task> displayedTasks) {
     _displayedTasks = displayedTasks;
@@ -101,7 +127,7 @@ class Store extends ChangeNotifier {
       id: id,
       taskName: taskName,
       taskDescription: "lorem ipsum",
-      status: "Not Started",
+      status: "Complete",
       startDate: startDate,
       deadline: deadline,
       assignedPeople: [
@@ -116,6 +142,30 @@ class Store extends ChangeNotifier {
     tasks.add(newTask);
     notifyListeners();
   } //ef
+
+  //employees
+  // ignore: prefer_final_fields
+  List<Employee> _employeeList = [
+    Employee(
+      id: 4,
+      name: "andy",
+      role: "Full-stack Developer",
+      image: "assets/icons/e1.png",
+    ),
+    Employee(
+      id: 5,
+      name: "jamppi",
+      role: "System Analyst",
+      image: "assets/icons/e1.png",
+    ),
+    Employee(
+      id: 6,
+      name: "nammi",
+      role: "Frontend Developer",
+      image: "assets/icons/e1.png",
+    ),
+  ];
+  List<Employee> get employeeList => _employeeList;
 } //ec
 
 main() {
@@ -129,4 +179,3 @@ main() {
     ),
   );
 } //ef
-

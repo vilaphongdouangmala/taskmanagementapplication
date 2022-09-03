@@ -64,20 +64,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.3"
-  drop_down_list:
+  dropdown_button2:
     dependency: "direct main"
     description:
-      name: drop_down_list
+      name: dropdown_button2
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.3"
-  dropdown_plus:
-    dependency: "direct main"
-    description:
-      name: dropdown_plus
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.9"
+    version: "1.7.2"
   easy_localization:
     dependency: "direct main"
     description:
