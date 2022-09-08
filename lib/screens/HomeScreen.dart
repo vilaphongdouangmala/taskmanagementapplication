@@ -1,122 +1,376 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:date_picker_timeline/date_picker_timeline.dart';
+//===> class: HomePage2
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:task_management_application/models/Employee.dart';
-import 'package:task_management_application/models/Task.dart';
+import 'package:task_management_application/models/Status.dart';
 import 'package:task_management_application/screens/TaskScreen.dart';
+import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
 
-import '../components/BottomNav.dart';
-import '../components/StatusBox.dart';
 import '../main.dart';
-import '/styles/AppColor.dart';
-import 'CreateTaskScreen.dart';
+import '../models/Employee.dart';
+import '../models/Task.dart';
 
 class HomeScreen extends StatelessWidget {
-  bool first = true;
+  List<String> statusTypes = Status.getStatusTypes();
+
+  HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    //store reference
+    Size screenScreen = MediaQuery.of(context).size;
     var store = Provider.of<Store>(context);
-    if (first) {
-      store.getDisplayedTasksByDate();
-      first = false;
-    } //end if
     return Scaffold(
-      //appBar
-      appBar: AppBar(
-        title: const Text("AppBar"),
-        backgroundColor: AppColor.primaryRed,
-        actions: [],
-      ),
-      //body
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(AppStyle.defaultPadding),
-            child: DatePicker(
-              DateTime(
-                DateTime.now().year,
-                DateTime.now().month,
-                DateTime.now().day - 5,
+      body: SingleChildScrollView(
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            //main body
+            Container(
+              padding: EdgeInsets.only(top: AppStyle.defaultPadding * 9),
+              width: screenScreen.width,
+              height: screenScreen.height,
+              decoration: const BoxDecoration(
+                color: AppColor.white,
               ),
-              initialSelectedDate: DateTime.now(),
-              selectionColor: AppColor.primaryColor,
-              onDateChange: (date) {
-                store.getDisplayedTasksByDate(filteredDate: date);
-              },
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                store.getTasks(refresh: true);
-                store.getDisplayedTasksByDate();
-              },
-              child: FutureBuilder<List<Task>>(
-                future: store.getTasks(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    //return progress
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else {
-                    //return widget
-                    return ListView.separated(
-                      itemCount: store.displayedTasks.length,
-                      itemBuilder: (BuildContext context, int i) {
-                        return GestureDetector(
-                          onTap: () {
-                            //move to new screen
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    TaskScreen(task: store.displayedTasks[i]),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.all(AppStyle.defaultPadding),
-                            child: ListTile(
-                              leading: Text(store.displayedTasks[i].taskName),
-                              title: Text(store.displayedTasks[i].deadline),
-                              trailing: StatusBox(
-                                task: store.displayedTasks[i],
-                              ),
+              child: Padding(
+                padding: EdgeInsets.all(AppStyle.defaultPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                          bottom: AppStyle.defaultPadding * 0.1),
+                      child: const Text(
+                        "Progress",
+                        style: AppStyle.mainHeadingBlack,
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(bottom: AppStyle.defaultPadding),
+                      height: 180,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: 10),
+                        itemCount: statusTypes.length,
+                        itemBuilder: (context, i) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: AppStyle.defaultPadding * 0.7,
+                                horizontal: 5),
+                            child: TaskCategory(
+                              status: statusTypes[i],
                             ),
-                          ),
-                        );
-                      },
-                      separatorBuilder: (context, index) => const Divider(),
-                    );
-                  }
-                },
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          bottom: AppStyle.defaultPadding * 0.1),
+                      child: const Text(
+                        "Upcoming Tasks",
+                        style: AppStyle.mainHeadingBlack,
+                      ),
+                    ),
+                    Expanded(
+                      child: FutureBuilder<List<Task>>(
+                        future: store.getTasks(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            //return progress
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else {
+                            //return widget
+                            return ListView.separated(
+                              padding: EdgeInsets.zero,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(
+                                height: 15,
+                              ),
+                              itemCount: store.tasks.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                Task task = store.tasks[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    //move to new creen
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            TaskScreen(task: task),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding:
+                                        EdgeInsets.all(AppStyle.defaultPadding),
+                                    decoration: BoxDecoration(
+                                        color: AppColor.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                AppColor.grey.withOpacity(0.8),
+                                            blurRadius: 3,
+                                            offset: const Offset(4, 4),
+                                          ),
+                                        ],
+                                        borderRadius:
+                                            BorderRadius.circular(15)),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 7),
+                                              child: Text(
+                                                task.taskName,
+                                                style: AppStyle.subHeading_b,
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 7),
+                                              child: Row(
+                                                children: [
+                                                  const Text(
+                                                    "Deadline: ",
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    AppStyle.dateFormatter
+                                                        .format(
+                                                      store.calDeadline(
+                                                          task.startDate,
+                                                          task.duration),
+                                                    ),
+                                                    style: const TextStyle(
+                                                        color: AppColor.black),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Container(
+                                              padding: const EdgeInsets.only(
+                                                  left: 5),
+                                              height: 30,
+                                              width: 100,
+                                              child: ListView.builder(
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                itemCount: task.assignedPeople
+                                                            .length <=
+                                                        3
+                                                    ? task.assignedPeople.length
+                                                    : 4,
+                                                itemBuilder: (context, index) {
+                                                  Employee assignee = task
+                                                      .assignedPeople[index];
+                                                  if (index < 3) {
+                                                    return Align(
+                                                      widthFactor: 0.65,
+                                                      child: CircleAvatar(
+                                                        radius: 15,
+                                                        child: SizedBox(
+                                                          child: Image.asset(
+                                                            assignee.image,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    return Align(
+                                                      widthFactor: 0.65,
+                                                      child: CircleAvatar(
+                                                        radius: 15,
+                                                        child: Text(
+                                                          "+${task.assignedPeople.length - 3}",
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNav(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //move to new creen
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CreateTaskScreen(),
+            //top part
+            Container(
+              padding: EdgeInsets.all(AppStyle.defaultPadding),
+              height: screenScreen.height * 0.25,
+              decoration: const BoxDecoration(
+                color: AppColor.primaryColor,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(50),
+                  bottomRight: Radius.circular(50),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      //intro
+                      Text(
+                        "Hi! Linrada",
+                        style: AppStyle.mainHeading,
+                      ),
+                      //role
+                      Text(
+                        "Project Manager",
+                        style: TextStyle(
+                          color: AppColor.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Icon(
+                    Icons.account_circle,
+                    color: AppColor.white,
+                    size: 50,
+                  )
+                ],
+              ),
             ),
-          );
-        },
-        backgroundColor: AppColor.primaryRed,
-        child: const Icon(
-          Icons.add,
+            //search box
+            Positioned(
+              top: screenScreen.width * 0.42,
+              child: SizedBox(
+                width: screenScreen.width * 0.8,
+                child: TextField(
+                  //controller: TextEditingController(text:'data'),
+                  style: TextStyle(color: Colors.grey[800]),
+                  onChanged: (String text) {
+                    store.setKey(text);
+                  },
+                  decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: AppColor.grey,
+                    hintText: 'Search...',
+                    suffixIcon: Icon(
+                      Icons.search,
+                      color: AppColor.black,
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(20.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   } //ef
 }
+
+class TaskCategory extends StatelessWidget {
+  TaskCategory({
+    Key? key,
+    required this.status,
+  }) : super(key: key);
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    //firstly get status as an object
+    Status? statusObj = Status.getStatus(status);
+    var store = Provider.of<Store>(context);
+    return GestureDetector(
+      onTap: () {
+        store.setSelectedTaskStatus(status);
+      },
+      child: Container(
+        width: 140,
+        height: 100,
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.6),
+              blurRadius: 3,
+              offset: const Offset(0, 4), // changes position of shadow
+            ),
+          ],
+          color: statusObj!.color,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(AppStyle.defaultPadding * 0.6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.3),
+                child: const Icon(
+                  Icons.circle,
+                  color: AppColor.white,
+                  size: 35,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: AppStyle.defaultPadding * 0.15,
+                ),
+                child: Text(
+                  statusObj.status,
+                  style: AppStyle.mainTaskStatus,
+                ),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(right: 5),
+                    width: 5,
+                    height: 30,
+                    decoration: const BoxDecoration(
+                      color: AppColor.white,
+                    ),
+                  ),
+                  Text(
+                    "${store.getTaskNumByStatus(statusObj.status)} projects",
+                    style: const TextStyle(
+                      color: AppColor.white,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}//ec

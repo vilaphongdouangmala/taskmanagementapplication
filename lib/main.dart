@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:task_management_application/models/Employee.dart';
+import 'package:task_management_application/screens/HomePage2.dart';
+import 'package:task_management_application/screens/LoginScreen.dart';
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
 import 'package:collection/collection.dart';
@@ -14,7 +16,7 @@ import 'models/Task.dart';
 import 'screens/HomeScreen.dart';
 
 class Store extends ChangeNotifier {
-  String connectionUrl = "http://192.168.183.41:1880";
+  String connectionUrl = "http://192.168.182.176:1880";
 
   //employees
   List<Employee> _employees = [];
@@ -28,13 +30,53 @@ class Store extends ChangeNotifier {
   List<Employee> _displayedEmployees = [];
   List<Employee> get displayedEmployees => _displayedEmployees;
 
-  //tasks
-  List<Task> _tasks = [];
-  List<Task> get tasks => _tasks;
-
-  //displayed tasks
+  //displayedEmployees
   List<Task> _displayedTasks = [];
   List<Task> get displayedTasks => _displayedTasks;
+
+  //tasks
+  List<Task> _tasks = [];
+  List<Task> get tasks {
+    if (_key.isEmpty && _selectedTaskStatus.isEmpty) {
+      return _tasks;
+    } else {
+      return _tasks.where((task) {
+        bool containNameCheck =
+            task.taskName.toLowerCase().contains(_key.toLowerCase());
+        if (_selectedTaskStatus.isNotEmpty) {
+          bool containStatusCheck = task.status == _selectedTaskStatus;
+          return containNameCheck && containStatusCheck;
+        } else {
+          return containNameCheck;
+        }
+      }).toList();
+    }
+  } //ef
+
+  // else if (_key.isNotEmpty && _selectedTaskStatus.isEmpty) {
+  //     return _tasks
+  //         .where((task) =>
+  //             task.taskName.toLowerCase().contains(_key.toLowerCase()))
+  //         .toList();
+  //   }
+
+  String _key = "";
+  String _selectedTaskStatus = "";
+
+  void setKey(String key) {
+    _key = key;
+    notifyListeners();
+  } //ef
+
+  void setSelectedTaskStatus(String status) {
+    //if user press again we uncategorize
+    if (_selectedTaskStatus == status) {
+      _selectedTaskStatus = "";
+    } else {
+      _selectedTaskStatus = status;
+    }
+    notifyListeners();
+  }
 
   void setEmployees(List<Employee> employees) {
     _employees = employees;
@@ -100,7 +142,7 @@ class Store extends ChangeNotifier {
       _displayedTasks.clear();
       String strFilteredDate = AppStyle.dateFormatter.format(filteredDate);
       for (Task t in _tasks) {
-        if (t.deadline == strFilteredDate) {
+        if (t.startDate == strFilteredDate) {
           _displayedTasks.add(t);
         } //eif
       } //eloop
@@ -121,7 +163,7 @@ class Store extends ChangeNotifier {
   } //ef
 
   //might need to change string to Datetime
-  void createNewTask(String taskName, String startDate, String deadline) {
+  void createNewTask(String taskName, String startDate, int duration) {
     int id = tasks.length + 1;
     Task newTask = Task(
       id: id,
@@ -129,7 +171,7 @@ class Store extends ChangeNotifier {
       taskDescription: "lorem ipsum",
       status: "Complete",
       startDate: startDate,
-      deadline: deadline,
+      duration: duration,
       assignedPeople: [
         Employee(
           id: 1,
@@ -141,6 +183,21 @@ class Store extends ChangeNotifier {
     );
     tasks.add(newTask);
     notifyListeners();
+  } //ef
+
+  int getTaskNumByStatus(String status) {
+    int counter = 0;
+    for (Task task in _tasks) {
+      if (task.status == status) {
+        counter += 1;
+      }
+    } //eloop
+    return counter;
+  } //ef
+
+  DateTime calDeadline(String startDate, int day) {
+    DateTime convertedStartDate = DateTime.parse(startDate);
+    return convertedStartDate.add(Duration(days: day));
   } //ef
 
   //employees

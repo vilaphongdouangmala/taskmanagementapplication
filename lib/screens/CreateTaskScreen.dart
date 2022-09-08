@@ -110,6 +110,26 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         ),
                       ),
                       Row(
+                        children: [
+                          SizedBox(
+                            width: screenSize.width * 0.45,
+                            child: TextField(
+                              //controller: TextEditingController(text:'data'),
+                              style: TextStyle(color: Colors.grey[800]),
+                              onChanged: (String text) {},
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(5.0),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      //startdate and deadline
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           //start date
@@ -256,7 +276,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           store.createNewTask(
                             taskName.text,
                             AppStyle.dateFormatter.format(startDate).toString(),
-                            AppStyle.dateFormatter.format(deadline).toString(),
+                            14, //DURATION
                           );
                           //popup
                           showDialog(

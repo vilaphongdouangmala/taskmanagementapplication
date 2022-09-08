@@ -20,6 +20,13 @@ class AppStyle {
     fontSize: 24,
     color: AppColor.white,
   );
+
+  static const mainHeadingBlack = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 24,
+    color: AppColor.black,
+  );
+
   static const subHeading_l = TextStyle(
     fontSize: 18,
     color: AppColor.black,
@@ -28,6 +35,13 @@ class AppStyle {
     fontSize: 18,
     color: AppColor.black,
     fontWeight: FontWeight.bold,
+  );
+
+  //mainpage
+  static const mainTaskStatus = TextStyle(
+    color: AppColor.white,
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
   );
 
   //create task screen

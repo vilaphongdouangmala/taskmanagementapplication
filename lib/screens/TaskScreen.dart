@@ -66,6 +66,12 @@ class _TaskScreenState extends State<TaskScreen> {
                       style: AppStyle.mainHeading,
                     ),
                   ),
+                  Text(
+                    widget.task.taskDescription,
+                    style: const TextStyle(
+                      color: AppColor.white,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -89,6 +95,31 @@ class _TaskScreenState extends State<TaskScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    //Start Date and Deadline
+                    SizedBox(
+                      width: screenSize.width * 0.5,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InfoBox(
+                            heading: "Start Date",
+                            content: widget.task.startDate,
+                          ),
+                          InfoBox(
+                            heading: "Deadline",
+                            content: AppStyle.dateFormatter.format(
+                              store.calDeadline(
+                                  widget.task.startDate, widget.task.duration),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    //Duration
+                    InfoBox(
+                      heading: "Duration",
+                      content: "${widget.task.duration} days",
+                    ),
                     //Status
                     Padding(
                       padding: EdgeInsets.only(
@@ -149,6 +180,41 @@ class _TaskScreenState extends State<TaskScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class InfoBox extends StatelessWidget {
+  const InfoBox({
+    Key? key,
+    required this.heading,
+    required this.content,
+  }) : super(key: key);
+
+  final String heading;
+  final String content;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: AppStyle.defaultPadding,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.25),
+            child: Text(
+              heading,
+              style: AppStyle.subHeading_l,
+            ),
+          ),
+          Text(
+            content,
+          )
+        ],
       ),
     );
   }
