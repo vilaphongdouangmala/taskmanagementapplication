@@ -1,6 +1,8 @@
 //===> class: #name#
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_management_application/components/AssigneeListView.dart';
+import 'package:task_management_application/models/Employee.dart';
 
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
@@ -18,17 +20,35 @@ class CreateTaskScreen extends StatefulWidget {
 }
 
 class _CreateTaskScreenState extends State<CreateTaskScreen> {
+  late Store store;
+
   //controllers
-  TextEditingController taskName = TextEditingController();
+  TextEditingController taskNameController = TextEditingController();
+  TextEditingController durationController = TextEditingController();
+  TextEditingController taskDescriptionController = TextEditingController();
 
   //date
   DateTime startDate = DateTime.now();
   DateTime deadline = DateTime.now();
 
+  //assignee
+  List<Employee> initialAssignees = [];
+
+  //task
+  Task creatingTask = Task(
+    id: 0,
+    taskName: "taskName",
+    taskDescription: "taskDescription",
+    status: "status",
+    startDate: "startDate",
+    duration: 0,
+    assignedPeople: [],
+  );
+
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
-    var store = Provider.of<Store>(context);
+    store = Provider.of<Store>(context);
     return Scaffold(
       body: GestureDetector(
         onTap: () {
@@ -70,7 +90,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 10),
                       child: Text(
-                        "Create Task",
+                        "Create a New Task",
                         style: AppStyle.mainHeading,
                       ),
                     ),
@@ -97,10 +117,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     children: [
                       //task name
                       Padding(
-                        padding: EdgeInsets.only(
-                            bottom: AppStyle.defaultPadding * 1.7),
+                        padding:
+                            EdgeInsets.only(bottom: AppStyle.defaultPadding),
                         child: TextField(
-                          controller: taskName,
+                          controller: taskNameController,
                           style: TextStyle(color: Colors.grey[800]),
                           onChanged: (String text) {},
                           decoration: const InputDecoration(
@@ -109,34 +129,35 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           ),
                         ),
                       ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: screenSize.width * 0.45,
-                            child: TextField(
-                              //controller: TextEditingController(text:'data'),
-                              style: TextStyle(color: Colors.grey[800]),
-                              onChanged: (String text) {},
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(5.0),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
+
+                      //task description
+                      Padding(
+                        padding:
+                            EdgeInsets.only(bottom: AppStyle.defaultPadding),
+                        child: TextField(
+                          maxLength: 256,
+                          maxLines: 6,
+                          controller: taskDescriptionController,
+                          style: TextStyle(color: Colors.grey[800]),
+                          onChanged: (String text) {},
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.all(10),
+                            hintText: 'Description',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
                       ),
-                      //startdate and deadline
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          //start date
-                          Padding(
-                            padding: EdgeInsets.only(
-                                bottom: AppStyle.defaultPadding * 1.7),
-                            child: Column(
+
+                      //startdate and duration
+                      Padding(
+                        padding:
+                            EdgeInsets.only(bottom: AppStyle.defaultPadding),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            //start date and duration
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
@@ -157,8 +178,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                         context: context,
                                         builder: (BuildContext context) {
                                           return const AlertPopup(
-                                              contentText:
-                                                  "The start date cannot be after deadline.");
+                                            contentText:
+                                                "The start date cannot be after deadline.",
+                                          );
                                         },
                                       );
                                       return;
@@ -197,89 +219,84 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ),
                               ],
                             ),
-                          ),
-
-                          //Deadline
-                          Padding(
-                            padding: EdgeInsets.only(
-                                bottom: AppStyle.defaultPadding * 1.7),
-                            child: Column(
+                            //duration
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  "Deadline",
-                                  style: AppStyle.subHeading_l,
-                                ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    DateTime? setDeadline = await datePicker(
-                                      context,
-                                      deadline,
-                                    );
-                                    if (setDeadline == null) {
-                                      //if user presses cancel, then return null
-                                      return;
-                                    } else if (setDeadline
-                                        .isBefore(startDate)) {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return const AlertPopup(
-                                            contentText:
-                                                "The deadline cannot be before start date.",
-                                          );
-                                        },
-                                      );
-                                      return;
-                                    } else {
-                                      setState(() {
-                                        deadline = setDeadline;
-                                      });
-                                    }
-                                  },
-                                  child: Container(
-                                    width: screenSize.width * 0.375,
-                                    padding: EdgeInsets.symmetric(
-                                        vertical:
-                                            AppStyle.defaultPadding * 0.5),
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                            color: AppColor.black, width: 0.6),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "${deadline.year}-${deadline.month}-${deadline.day}",
-                                          style: AppStyle.formText,
-                                        ),
-                                        const Icon(
-                                          Icons.edit_calendar,
-                                          color: AppColor.black,
-                                        ),
-                                      ],
-                                    ),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 10),
+                                  child: Text(
+                                    "Duration",
+                                    style: AppStyle.subHeading_l,
                                   ),
                                 ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(right: 10),
+                                      width: screenSize.width * 0.3,
+                                      height: 40,
+                                      child: TextField(
+                                        controller: durationController,
+                                        style:
+                                            TextStyle(color: Colors.grey[800]),
+                                        onChanged: (String text) {},
+                                        decoration: const InputDecoration(),
+                                      ),
+                                    ),
+                                    const Text(
+                                      "Days",
+                                      style: AppStyle.subHeading_l,
+                                    ),
+                                  ],
+                                ),
                               ],
+                            )
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                            bottom: AppStyle.defaultPadding * 1.7),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  bottom: AppStyle.defaultPadding * 0.5),
+                              child: const Text(
+                                "Assign Employees",
+                                style: AppStyle.subHeading_l,
+                              ),
                             ),
-                          ),
-                        ],
+                            AssigneeListView(
+                              task: creatingTask,
+                            ),
+                          ],
+                        ),
                       ),
                       //create button
                       LongButton(
                         text: "Create New Task",
-                        press: () {
-                          store.createNewTask(
-                            taskName.text,
-                            AppStyle.dateFormatter.format(startDate).toString(),
-                            14, //DURATION
-                          );
-                          //popup
-                          showDialog(
+                        press: () async {
+                          //set task information
+                          creatingTask.id = store.tasks.length;
+                          creatingTask.taskName = taskNameController.text;
+                          creatingTask.taskDescription =
+                              taskDescriptionController.text;
+                          creatingTask.status = "Not Started";
+                          creatingTask.startDate =
+                              AppStyle.dateFormatter.format(startDate);
+                          creatingTask.duration =
+                              int.parse(durationController.text);
+                          //assigned people are set in listview
+
+                          //add task
+                          store.setNewTask(creatingTask);
+
+                          //confirmation popup
+                          await showDialog(
                             context: context,
                             builder: (BuildContext context) {
                               return const AlertPopup(
@@ -287,6 +304,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               );
                             },
                           );
+                          //pop the screen after creating
+                          Navigator.pop(context);
                         },
                       ),
                     ],
@@ -300,4 +319,4 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     );
   } //ef
 
-}
+} //ec

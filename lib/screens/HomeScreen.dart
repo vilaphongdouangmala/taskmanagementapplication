@@ -9,6 +9,7 @@ import 'package:task_management_application/styles/AppStyle.dart';
 import '../main.dart';
 import '../models/Employee.dart';
 import '../models/Task.dart';
+import 'CreateTaskScreen.dart';
 
 class HomeScreen extends StatelessWidget {
   List<String> statusTypes = Status.getStatusTypes();
@@ -290,6 +291,21 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          //move to new creen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreateTaskScreen(),
+            ),
+          );
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: const Icon(
+          Icons.add,
         ),
       ),
     );

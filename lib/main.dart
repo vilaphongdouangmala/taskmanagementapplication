@@ -16,7 +16,7 @@ import 'models/Task.dart';
 import 'screens/HomeScreen.dart';
 
 class Store extends ChangeNotifier {
-  String connectionUrl = "http://192.168.182.176:1880";
+  String connectionUrl = "http://192.168.182.184:1880";
 
   //employees
   List<Employee> _employees = [];
@@ -29,10 +29,6 @@ class Store extends ChangeNotifier {
   //displayedEmployees
   List<Employee> _displayedEmployees = [];
   List<Employee> get displayedEmployees => _displayedEmployees;
-
-  //displayedEmployees
-  List<Task> _displayedTasks = [];
-  List<Task> get displayedTasks => _displayedTasks;
 
   //tasks
   List<Task> _tasks = [];
@@ -50,15 +46,8 @@ class Store extends ChangeNotifier {
           return containNameCheck;
         }
       }).toList();
-    }
+    } //end if else
   } //ef
-
-  // else if (_key.isNotEmpty && _selectedTaskStatus.isEmpty) {
-  //     return _tasks
-  //         .where((task) =>
-  //             task.taskName.toLowerCase().contains(_key.toLowerCase()))
-  //         .toList();
-  //   }
 
   String _key = "";
   String _selectedTaskStatus = "";
@@ -133,24 +122,24 @@ class Store extends ChangeNotifier {
 
   //end task region
 
-  void setDisplayedTasks(List<Task> displayedTasks) {
-    _displayedTasks = displayedTasks;
-  } //ef
+  // void setDisplayedTasks(List<Task> displayedTasks) {
+  //   _displayedTasks = displayedTasks;
+  // } //ef
 
-  void getDisplayedTasksByDate({DateTime? filteredDate}) {
-    if (filteredDate != null) {
-      _displayedTasks.clear();
-      String strFilteredDate = AppStyle.dateFormatter.format(filteredDate);
-      for (Task t in _tasks) {
-        if (t.startDate == strFilteredDate) {
-          _displayedTasks.add(t);
-        } //eif
-      } //eloop
-      notifyListeners();
-    } else {
-      _displayedTasks = _tasks;
-    }
-  } //ef
+  // void getDisplayedTasksByDate({DateTime? filteredDate}) {
+  //   if (filteredDate != null) {
+  //     _displayedTasks.clear();
+  //     String strFilteredDate = AppStyle.dateFormatter.format(filteredDate);
+  //     for (Task t in _tasks) {
+  //       if (t.startDate == strFilteredDate) {
+  //         _displayedTasks.add(t);
+  //       } //eif
+  //     } //eloop
+  //     notifyListeners();
+  //   } else {
+  //     _displayedTasks = _tasks;
+  //   }
+  // } //ef
 
   Future<String> get(url) async {
     var res = await http.get(Uri.parse(url));
@@ -163,12 +152,13 @@ class Store extends ChangeNotifier {
   } //ef
 
   //might need to change string to Datetime
-  void createNewTask(String taskName, String startDate, int duration) {
+  void createNewTask(
+      String taskName, String taskDescription, String startDate, int duration) {
     int id = tasks.length + 1;
     Task newTask = Task(
       id: id,
       taskName: taskName,
-      taskDescription: "lorem ipsum",
+      taskDescription: taskDescription,
       status: "Complete",
       startDate: startDate,
       duration: duration,
@@ -182,6 +172,11 @@ class Store extends ChangeNotifier {
       ],
     );
     tasks.add(newTask);
+    notifyListeners();
+  } //ef
+
+  void setNewTask(Task task) {
+    tasks.add(task);
     notifyListeners();
   } //ef
 
@@ -199,30 +194,6 @@ class Store extends ChangeNotifier {
     DateTime convertedStartDate = DateTime.parse(startDate);
     return convertedStartDate.add(Duration(days: day));
   } //ef
-
-  //employees
-  // ignore: prefer_final_fields
-  List<Employee> _employeeList = [
-    Employee(
-      id: 4,
-      name: "andy",
-      role: "Full-stack Developer",
-      image: "assets/icons/e1.png",
-    ),
-    Employee(
-      id: 5,
-      name: "jamppi",
-      role: "System Analyst",
-      image: "assets/icons/e1.png",
-    ),
-    Employee(
-      id: 6,
-      name: "nammi",
-      role: "Frontend Developer",
-      image: "assets/icons/e1.png",
-    ),
-  ];
-  List<Employee> get employeeList => _employeeList;
 } //ec
 
 main() {

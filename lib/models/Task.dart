@@ -4,13 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:task_management_application/models/Employee.dart';
 
 class Task {
-  final int id;
-  final String taskName;
-  final String taskDescription;
+  int id;
+  String taskName;
+  String taskDescription;
   String status;
-  final String startDate;
+  String startDate;
   int duration;
-  final List<Employee> assignedPeople;
+  List<Employee> assignedPeople;
   Task({
     required this.id,
     required this.taskName,
