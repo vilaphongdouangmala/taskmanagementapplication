@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:task_management_application/models/Employee.dart';
+import 'package:task_management_application/models/SubTask.dart';
 import 'package:task_management_application/screens/HomePage2.dart';
 import 'package:task_management_application/screens/LoginScreen.dart';
 import 'package:task_management_application/styles/AppColor.dart';
@@ -16,7 +17,7 @@ import 'models/Task.dart';
 import 'screens/HomeScreen.dart';
 
 class Store extends ChangeNotifier {
-  String connectionUrl = "http://192.168.182.184:1880";
+  String connectionUrl = "http://192.168.183.221:1880";
 
   //employees
   List<Employee> _employees = [];
@@ -120,6 +121,17 @@ class Store extends ChangeNotifier {
     return _tasks;
   } //ef
 
+  double calTaskProgress(Task task) {
+    int completeCount = 0;
+    int totalSubtask = task.subTasks.length;
+    for (SubTask subTask in task.subTasks) {
+      if (subTask.complete == true) {
+        completeCount += 1;
+      } //end if
+    } //eloop
+    return (completeCount / totalSubtask);
+  } //ef
+
   //end task region
 
   // void setDisplayedTasks(List<Task> displayedTasks) {
@@ -151,30 +163,6 @@ class Store extends ChangeNotifier {
     }
   } //ef
 
-  //might need to change string to Datetime
-  void createNewTask(
-      String taskName, String taskDescription, String startDate, int duration) {
-    int id = tasks.length + 1;
-    Task newTask = Task(
-      id: id,
-      taskName: taskName,
-      taskDescription: taskDescription,
-      status: "Complete",
-      startDate: startDate,
-      duration: duration,
-      assignedPeople: [
-        Employee(
-          id: 1,
-          name: "name",
-          role: "role",
-          image: "image",
-        ),
-      ],
-    );
-    tasks.add(newTask);
-    notifyListeners();
-  } //ef
-
   void setNewTask(Task task) {
     tasks.add(task);
     notifyListeners();
@@ -202,7 +190,7 @@ main() {
       create: (BuildContext context) => Store(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: HomeScreen(),
+        home: LoginScreen(),
       ),
     ),
   );

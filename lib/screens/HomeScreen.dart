@@ -6,6 +6,7 @@ import 'package:task_management_application/screens/TaskScreen.dart';
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
 
+import '../components/ProgressCircle.dart';
 import '../main.dart';
 import '../models/Employee.dart';
 import '../models/Task.dart';
@@ -204,6 +205,12 @@ class HomeScreen extends StatelessWidget {
                                               ),
                                             ),
                                           ],
+                                        ),
+                                        ProgressCircle(
+                                          taskProgress:
+                                              store.calTaskProgress(task),
+                                          radius: 30,
+                                          fontSize: 14,
                                         ),
                                       ],
                                     ),

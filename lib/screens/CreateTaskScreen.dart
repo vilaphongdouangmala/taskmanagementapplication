@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_management_application/components/AssigneeListView.dart';
 import 'package:task_management_application/models/Employee.dart';
+import 'package:task_management_application/models/SubTask.dart';
 
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
@@ -31,8 +32,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   DateTime startDate = DateTime.now();
   DateTime deadline = DateTime.now();
 
-  //assignee
+  //list
   List<Employee> initialAssignees = [];
+  List<SubTask> subTasks = [];
 
   //task
   Task creatingTask = Task(
@@ -43,6 +45,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     startDate: "startDate",
     duration: 0,
     assignedPeople: [],
+    subTasks: [],
   );
 
   @override

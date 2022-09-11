@@ -5,12 +5,15 @@ import 'package:task_management_application/components/LongButton.dart';
 import 'package:task_management_application/components/StatusBox.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:task_management_application/models/Employee.dart';
+import 'package:task_management_application/models/SubTask.dart';
 import 'package:task_management_application/screens/AddAssigneeCard.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 import '../components/ArrowBackButton.dart';
 import '../components/AssigneeListView.dart';
 import '../components/HeroDialogRoute.dart';
 import '../components/InfoBox.dart';
+import '../components/ProgressCircle.dart';
 import '../main.dart';
 import '../models/Status.dart';
 import '../models/Task.dart';
@@ -37,14 +40,16 @@ class _TaskScreenState extends State<TaskScreen> {
     List<String> statusTypes = Status.getStatusTypes();
     Status? selectedStatus = Status.getStatus(widget.task.status);
     String? selectedValue = selectedStatus!.status;
+    double taskProgress = store.calTaskProgress(widget.task);
     return Scaffold(
       body: SingleChildScrollView(
         child: Stack(
           children: [
             Container(
-              padding: EdgeInsets.symmetric(
-                vertical: screenSize.height * 0.08,
-                horizontal: AppStyle.defaultPadding,
+              padding: EdgeInsets.only(
+                top: screenSize.height * 0.08,
+                left: AppStyle.defaultPadding,
+                right: AppStyle.defaultPadding,
               ),
               decoration: const BoxDecoration(
                 color: AppColor.primaryColor,
@@ -84,7 +89,7 @@ class _TaskScreenState extends State<TaskScreen> {
               bottom: 0,
               child: Container(
                 padding: EdgeInsets.symmetric(
-                  vertical: screenSize.height * 0.08,
+                  vertical: screenSize.height * 0.04,
                   horizontal: AppStyle.defaultPadding,
                 ),
                 decoration: const BoxDecoration(
@@ -100,7 +105,7 @@ class _TaskScreenState extends State<TaskScreen> {
                   children: [
                     //Start Date and Deadline
                     SizedBox(
-                      width: screenSize.width * 0.5,
+                      // width: screenSize.width * 0.5,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -114,6 +119,11 @@ class _TaskScreenState extends State<TaskScreen> {
                               store.calDeadline(
                                   widget.task.startDate, widget.task.duration),
                             ),
+                          ),
+                          ProgressCircle(
+                            taskProgress: taskProgress,
+                            radius: 40,
+                            fontSize: 18,
                           ),
                         ],
                       ),
@@ -159,22 +169,69 @@ class _TaskScreenState extends State<TaskScreen> {
                       ),
                     ),
                     //Assignees
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(
-                              bottom: AppStyle.defaultPadding * 0.5),
-                          child: const Text(
-                            "Assignees",
-                            style: AppStyle.subHeading_l,
+                    Padding(
+                      padding: EdgeInsets.only(bottom: AppStyle.defaultPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                                bottom: AppStyle.defaultPadding * 0.5),
+                            child: const Text(
+                              "Assignees",
+                              style: AppStyle.subHeading_l,
+                            ),
                           ),
+                          AssigneeListView(
+                            task: widget.task,
+                          ),
+                        ],
+                      ),
+                    ),
+                    //subTasks
+                    Padding(
+                      padding: EdgeInsets.only(
+                          bottom: AppStyle.defaultPadding * 0.7),
+                      child: const Text(
+                        "Subtasks",
+                        style: AppStyle.subHeading_l,
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.separated(
+                        padding: EdgeInsets.zero,
+                        separatorBuilder: (context, indext) => const SizedBox(
+                          height: 10,
                         ),
-                        AssigneeListView(
-                          task: widget.task,
-                        ),
-                      ],
-                    )
+                        itemCount: widget.task.subTasks.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          SubTask subTask = widget.task.subTasks[index];
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding:
+                                EdgeInsets.all(AppStyle.defaultPadding * 0.5),
+                            decoration: BoxDecoration(
+                              color: subTask.complete
+                                  ? Color.fromARGB(255, 203, 237, 172)
+                                  : AppColor.grey,
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                            child: CheckboxListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: AppStyle.defaultPadding * 0.1),
+                              value: subTask.complete,
+                              title: Text(subTask.name),
+                              onChanged: (bool? value) {
+                                subTask.complete = value!;
+                                store.notifyListeners();
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -183,5 +240,6 @@ class _TaskScreenState extends State<TaskScreen> {
         ),
       ),
     );
-  }
+  } //ef
 }//ec
+

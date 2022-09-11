@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:task_management_application/models/Employee.dart';
+import 'package:task_management_application/models/SubTask.dart';
 
 class Task {
   int id;
@@ -11,6 +12,7 @@ class Task {
   String startDate;
   int duration;
   List<Employee> assignedPeople;
+  List<SubTask> subTasks;
   Task({
     required this.id,
     required this.taskName,
@@ -19,6 +21,7 @@ class Task {
     required this.startDate,
     required this.duration,
     required this.assignedPeople,
+    required this.subTasks,
   });
 
   Task copyWith({
@@ -29,6 +32,7 @@ class Task {
     String? startDate,
     int? duration,
     List<Employee>? assignedPeople,
+    List<SubTask>? subTasks,
   }) {
     return Task(
       id: id ?? this.id,
@@ -38,6 +42,7 @@ class Task {
       startDate: startDate ?? this.startDate,
       duration: duration ?? this.duration,
       assignedPeople: assignedPeople ?? this.assignedPeople,
+      subTasks: subTasks ?? this.subTasks,
     );
   }
 
@@ -50,6 +55,7 @@ class Task {
       'startDate': startDate,
       'duration': duration,
       'assignedPeople': assignedPeople.map((x) => x.toMap()).toList(),
+      'subTasks': subTasks.map((x) => x.toMap()).toList(),
     };
   }
 
@@ -66,6 +72,11 @@ class Task {
           (x) => Employee.fromMap(x as Map<String, dynamic>),
         ),
       ),
+      subTasks: List<SubTask>.from(
+        (map['subTasks'] as List<dynamic>).map<SubTask>(
+          (x) => SubTask.fromMap(x as Map<String, dynamic>),
+        ),
+      ),
     );
   }
 
@@ -76,7 +87,7 @@ class Task {
 
   @override
   String toString() {
-    return 'Task(id: $id, taskName: $taskName, taskDescription: $taskDescription, status: $status, startDate: $startDate, duration: $duration, assignedPeople: $assignedPeople)';
+    return 'Task(id: $id, taskName: $taskName, taskDescription: $taskDescription, status: $status, startDate: $startDate, duration: $duration, assignedPeople: $assignedPeople, subTasks: $subTasks)';
   }
 
   @override
@@ -89,7 +100,8 @@ class Task {
         other.status == status &&
         other.startDate == startDate &&
         other.duration == duration &&
-        listEquals(other.assignedPeople, assignedPeople);
+        listEquals(other.assignedPeople, assignedPeople) &&
+        listEquals(other.subTasks, subTasks);
   }
 
   @override
@@ -100,6 +112,7 @@ class Task {
         status.hashCode ^
         startDate.hashCode ^
         duration.hashCode ^
-        assignedPeople.hashCode;
+        assignedPeople.hashCode ^
+        subTasks.hashCode;
   }
-}
+}//ec
