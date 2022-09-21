@@ -46,6 +46,12 @@ class AppStyle {
     fontSize: 16,
   );
 
+  static const semiBoldWhiteText = TextStyle(
+    color: AppColor.white,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+  );
+
   //create task screen
   static const formText = TextStyle(
     fontSize: 18,

@@ -19,7 +19,7 @@ import 'models/Task.dart';
 import 'screens/HomeScreen.dart';
 
 class Store extends ChangeNotifier {
-  String connectionUrl = "http://10.120.59.76:1880";
+  String connectionUrl = "http://192.168.182.113:1880";
 
   //employees
   List<Employee> _employees = [];
@@ -36,13 +36,7 @@ class Store extends ChangeNotifier {
   //tasks
   List<Task> _tasks = [];
   List<Task> get tasks {
-    if (_selectedDate != null) {
-      return _tasks.where((task) {
-        bool sameDate =
-            calDeadline(task.startDate, task.duration) == _selectedDate;
-        return sameDate;
-      }).toList();
-    } else if (_key.isEmpty && _selectedTaskStatus.isEmpty) {
+    if (_key.isEmpty && _selectedTaskStatus.isEmpty) {
       return _tasks;
     } else {
       return _tasks.where((task) {
@@ -75,9 +69,14 @@ class Store extends ChangeNotifier {
   //   } //end if else
   // } //ef
 
+  DateTime _selectedDate = DateTime.now();
   String _key = "";
   String _selectedTaskStatus = "";
-  DateTime? _selectedDate = null;
+  String get selectedTaskStatus => _selectedTaskStatus;
+
+  void update() {
+    notifyListeners();
+  } //ef
 
   void setKey(String key) {
     _key = key;
@@ -150,6 +149,41 @@ class Store extends ChangeNotifier {
       return _tasks;
     }
     return _tasks;
+  } //ef
+
+  List<SubTask> _subtasks = [];
+  List<SubTask> get subtasks {
+    if (_selectedDate == DateTime.utc(1956)) {
+      return _subtasks;
+    } else {
+      return getSubTaskByDate(_selectedDate);
+    }
+  } //ef
+
+  List<SubTask> getAllSubtasks() {
+    List<SubTask> subtasks = [];
+    for (Task task in _tasks) {
+      for (SubTask subtask in task.subTasks) {
+        subtasks.add(subtask);
+      } //eloop subtasks
+    } //eloop tasks
+    return subtasks;
+  } //ef
+
+  //get subtasks on calendar screen
+  List<SubTask> getSubTaskByDate(DateTime date) {
+    List<SubTask> subtasks = [];
+    for (Task task in _tasks) {
+      for (SubTask subtask in task.subTasks) {
+        bool sameDate =
+            AppStyle.dateFormatter.format(DateTime.parse(subtask.datetime)) ==
+                AppStyle.dateFormatter.format(date);
+        if (sameDate) {
+          subtasks.add(subtask);
+        } //end if
+      } //eloop subtasks
+    } //eloop tasks
+    return subtasks;
   } //ef
 
   double calTaskProgress(Task task) {
@@ -233,20 +267,27 @@ class AppMain extends StatelessWidget {
       body: store._tabs[store._bottomNavIndex],
       floatingActionButton: Visibility(
         visible: !showFloatingBtn,
-        child: FloatingActionButton(
-          onPressed: () {
-            //move to new creen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CreateTaskScreen(),
+        child: CircleAvatar(
+          backgroundColor: AppColor.white,
+          radius: 38,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: FloatingActionButton(
+              onPressed: () {
+                //move to new creen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CreateTaskScreen(),
+                  ),
+                );
+              },
+              backgroundColor: AppColor.primaryColor,
+              child: const Icon(
+                Icons.add,
+                size: 35,
               ),
-            );
-          },
-          backgroundColor: AppColor.primaryYellow,
-          child: const Icon(
-            Icons.add,
-            size: 30,
+            ),
           ),
         ),
       ),
@@ -256,8 +297,9 @@ class AppMain extends StatelessWidget {
         activeIndex: store.bottomNavIndex,
         gapLocation: GapLocation.center,
         notchSmoothness: NotchSmoothness.softEdge,
-        leftCornerRadius: 20,
-        rightCornerRadius: 20,
+        notchMargin: -5,
+        leftCornerRadius: 30,
+        rightCornerRadius: 30,
         onTap: (index) => store.setTabChange(index),
         itemCount: store.iconList.length,
         tabBuilder: (int index, bool isActive) {

@@ -297,7 +297,7 @@ class HomeScreen extends StatelessWidget {
           Positioned(
             top: screenScreen.width * 0.42,
             child: SizedBox(
-              width: screenScreen.width * 0.8,
+              width: screenScreen.width * 0.85,
               child: TextField(
                 //controller: TextEditingController(text:'data'),
                 style: TextStyle(color: Colors.grey[800]),
@@ -313,7 +313,7 @@ class HomeScreen extends StatelessWidget {
                     color: AppColor.black,
                   ),
                   contentPadding:
-                      EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.all(
@@ -357,7 +357,10 @@ class TaskCategory extends StatelessWidget {
               offset: const Offset(0, 4), // changes position of shadow
             ),
           ],
-          color: statusObj!.color,
+          color: (store.selectedTaskStatus == statusObj!.status ||
+                  store.selectedTaskStatus == "")
+              ? statusObj.color
+              : AppColor.darkGrey,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Padding(

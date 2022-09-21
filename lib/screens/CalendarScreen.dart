@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:task_management_application/models/Employee.dart';
+import 'package:task_management_application/models/SubTask.dart';
 import 'package:task_management_application/models/Task.dart';
 import 'package:task_management_application/screens/TaskScreen.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
@@ -21,80 +22,90 @@ class CaldendarScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     //store reference
     var store = Provider.of<Store>(context);
-    if (first) {
-      store.getTasks();
-      first = false;
-    } //end if
+    Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
-      //appBar
-      appBar: AppBar(
-        title: const Text("AppBar"),
-        backgroundColor: AppColor.primaryRed,
-        actions: [],
-      ),
       //body
-      body: Column(
+      body: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.all(AppStyle.defaultPadding),
-            child: DatePicker(
-              DateTime(
-                DateTime.now().year,
-                DateTime.now().month,
-                DateTime.now().day - 5,
-              ),
-              initialSelectedDate: DateTime.now(),
-              selectionColor: AppColor.primaryColor,
-              onDateChange: (date) {
-                store.setSelectedDate(date);
-              },
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                store.getTasks(refresh: true);
-              },
-              child: FutureBuilder<List<Task>>(
-                future: store.getTasks(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    //return progress
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else {
-                    //return widget
-                    return ListView.separated(
-                      itemCount: store.tasks.length,
-                      itemBuilder: (BuildContext context, int i) {
-                        return GestureDetector(
-                          onTap: () {
-                            //move to new screen
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    TaskScreen(task: store.tasks[i]),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.all(AppStyle.defaultPadding),
-                            child: ListTile(
-                              leading: Text(store.tasks[i].taskName),
-                              title: Text(store.tasks[i].startDate),
-                              trailing: StatusBox(
-                                task: store.tasks[i],
+            padding: EdgeInsets.only(top: screenSize.height * 0.18),
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(AppStyle.defaultPadding),
+                  child: DatePicker(
+                    DateTime(
+                      DateTime.now().year,
+                      DateTime.now().month,
+                      DateTime.now().day - 5,
+                    ),
+                    initialSelectedDate: DateTime.now(),
+                    daysCount: 31,
+                    selectionColor: AppColor.primaryColor,
+                    onDateChange: (date) {
+                      store.setSelectedDate(date);
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: store.subtasks.isEmpty
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  bottom: AppStyle.defaultPadding * 0.5),
+                              child: const Text(
+                                "No Activities For Today",
+                                style: AppStyle.mainHeadingBlack,
                               ),
                             ),
-                          ),
-                        );
-                      },
-                      separatorBuilder: (context, index) => const Divider(),
-                    );
-                  }
-                },
+                            const Icon(
+                              Icons.celebration,
+                              size: 60,
+                              color: AppColor.primaryColor,
+                            ),
+                          ],
+                        )
+                      : ListView.builder(
+                          itemCount: store.subtasks.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              leading: Text(store.subtasks[index].name),
+                              subtitle: Text(store.subtasks[index].datetime),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: screenSize.height * 0.18,
+            width: screenSize.width,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(50),
+                bottomRight: Radius.circular(50),
+              ),
+              color: AppColor.primaryColor,
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(AppStyle.defaultPadding,
+                  AppStyle.defaultPadding * 1.5, AppStyle.defaultPadding, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text(
+                    "Today's Activities",
+                    style: AppStyle.mainHeading,
+                  ),
+                  Icon(
+                    Icons.account_circle,
+                    size: 50,
+                    color: AppColor.white,
+                  ),
+                ],
               ),
             ),
           ),

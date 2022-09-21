@@ -19,7 +19,7 @@ class LongButton extends StatelessWidget {
       minWidth: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       color: AppColor.primaryColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       onPressed: press,
       child: Text(
         text,

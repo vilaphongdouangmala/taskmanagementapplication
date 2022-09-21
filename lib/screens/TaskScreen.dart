@@ -208,24 +208,39 @@ class TaskScreen extends StatelessWidget {
                           SubTask subTask = task.subTasks[index];
                           return AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
-                            padding:
-                                EdgeInsets.all(AppStyle.defaultPadding * 0.5),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 6, horizontal: 20),
                             decoration: BoxDecoration(
                               color: subTask.complete
-                                  ? Color.fromARGB(255, 203, 237, 172)
-                                  : AppColor.grey,
+                                  ? AppColor.primaryGreen
+                                  : AppColor.primaryYellow,
                               borderRadius: const BorderRadius.all(
-                                Radius.circular(10),
+                                Radius.circular(20),
                               ),
                             ),
                             child: CheckboxListTile(
+                              side: const BorderSide(
+                                color: AppColor.white,
+                                width: 3,
+                              ),
+                              checkColor: AppColor.black,
+                              activeColor: AppColor.white,
                               checkboxShape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(100)),
+                                borderRadius: BorderRadius.circular(100),
+                              ),
                               contentPadding: EdgeInsets.symmetric(
                                   horizontal: AppStyle.defaultPadding * 0.1),
                               value: subTask.complete,
-                              title: Text(subTask.name),
-                              subtitle: Text(subTask.datetime),
+                              title: Text(
+                                subTask.name,
+                                style: AppStyle.semiBoldWhiteText,
+                              ),
+                              subtitle: Text(
+                                "Date: ${subTask.datetime}",
+                                style: const TextStyle(
+                                  color: AppColor.white,
+                                ),
+                              ),
                               onChanged: (bool? value) {
                                 subTask.complete = value!;
                                 store.notifyListeners();
@@ -366,7 +381,7 @@ class TaskScreen extends StatelessWidget {
                                               ),
                                             );
                                             task.subTasks.add(newSubTask);
-                                            store.notifyListeners();
+                                            store.update();
                                             //show confirmation dialog
                                             await showDialog(
                                               context: context,

@@ -57,7 +57,7 @@ class Status {
   static List<Status> statuses = [
     Status(
       status: "Not Started",
-      color: Colors.grey[300],
+      color: AppColor.primaryPurple,
     ),
     Status(
       status: "In Progress",
