@@ -8,6 +8,8 @@ class AppStyle {
 
   //main formats
   static DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
+  static DateFormat timeFormatter = DateFormat('HH:mm');
+  static DateFormat dateTimeFormatter = DateFormat('yyyy-MM-dd HH:mm');
   static const pagePopText = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.bold,

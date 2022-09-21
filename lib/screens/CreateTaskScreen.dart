@@ -12,6 +12,7 @@ import '../components/AlertPopup.dart';
 import '../components/ArrowBackButton.dart';
 import '../components/FormDatePicker.dart';
 import '../components/LongButton.dart';
+import '../components/UnderlineTextBox.dart';
 import '../main.dart';
 import '../models/Task.dart';
 
@@ -122,14 +123,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       Padding(
                         padding:
                             EdgeInsets.only(bottom: AppStyle.defaultPadding),
-                        child: TextField(
+                        child: UnderlineTextBox(
                           controller: taskNameController,
-                          style: TextStyle(color: Colors.grey[800]),
-                          onChanged: (String text) {},
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.all(10),
-                            hintText: 'Task Name',
-                          ),
+                          hintText: 'Task Name',
+                          onChange: null,
                         ),
                       ),
 
@@ -322,4 +319,4 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     );
   } //ef
 
-} //ec
+}

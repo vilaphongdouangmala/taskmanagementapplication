@@ -5,6 +5,8 @@ import 'package:task_management_application/models/Status.dart';
 import 'package:task_management_application/screens/TaskScreen.dart';
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
+import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 import '../components/ProgressCircle.dart';
 import '../main.dart';
@@ -14,119 +16,140 @@ import 'CreateTaskScreen.dart';
 
 class HomeScreen extends StatelessWidget {
   List<String> statusTypes = Status.getStatusTypes();
-
-  HomeScreen({Key? key}) : super(key: key);
+  HomeScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     Size screenScreen = MediaQuery.of(context).size;
     var store = Provider.of<Store>(context);
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            //main body
-            Container(
-              padding: EdgeInsets.only(top: AppStyle.defaultPadding * 9),
-              width: screenScreen.width,
-              height: screenScreen.height,
-              decoration: const BoxDecoration(
-                color: AppColor.white,
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(AppStyle.defaultPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(
-                          bottom: AppStyle.defaultPadding * 0.1),
-                      child: const Text(
-                        "Progress",
-                        style: AppStyle.mainHeadingBlack,
-                      ),
+    return SingleChildScrollView(
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          //main body
+          Container(
+            padding: EdgeInsets.only(top: AppStyle.defaultPadding * 9),
+            width: screenScreen.width,
+            height: screenScreen.height * 1.25,
+            decoration: const BoxDecoration(
+              color: AppColor.white,
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(AppStyle.defaultPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding:
+                        EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.1),
+                    child: const Text(
+                      "Progress",
+                      style: AppStyle.mainHeadingBlack,
                     ),
-                    Container(
-                      margin: EdgeInsets.only(bottom: AppStyle.defaultPadding),
-                      height: 180,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(width: 10),
-                        itemCount: statusTypes.length,
-                        itemBuilder: (context, i) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: AppStyle.defaultPadding * 0.7,
-                                horizontal: 5),
-                            child: TaskCategory(
-                              status: statusTypes[i],
-                            ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(bottom: AppStyle.defaultPadding),
+                    height: 180,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 10),
+                      itemCount: statusTypes.length,
+                      itemBuilder: (context, i) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: AppStyle.defaultPadding * 0.7,
+                              horizontal: 5),
+                          child: TaskCategory(
+                            status: statusTypes[i],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.1),
+                    child: const Text(
+                      "Upcoming Tasks",
+                      style: AppStyle.mainHeadingBlack,
+                    ),
+                  ),
+                  Expanded(
+                    child: FutureBuilder<List<Task>>(
+                      future: store.getTasks(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          //return progress
+                          return const Center(
+                            child: CircularProgressIndicator(),
                           );
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(
-                          bottom: AppStyle.defaultPadding * 0.1),
-                      child: const Text(
-                        "Upcoming Tasks",
-                        style: AppStyle.mainHeadingBlack,
-                      ),
-                    ),
-                    Expanded(
-                      child: FutureBuilder<List<Task>>(
-                        future: store.getTasks(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            //return progress
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else {
-                            //return widget
-                            return ListView.separated(
-                              padding: EdgeInsets.zero,
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(
-                                height: 15,
-                              ),
-                              itemCount: store.tasks.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                Task task = store.tasks[index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    //move to new creen
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            TaskScreen(task: task),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding:
-                                        EdgeInsets.all(AppStyle.defaultPadding),
-                                    decoration: BoxDecoration(
-                                        color: AppColor.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                AppColor.grey.withOpacity(0.8),
-                                            blurRadius: 3,
-                                            offset: const Offset(4, 4),
+                        } else {
+                          //return widget
+                          return ListView.separated(
+                            padding: EdgeInsets.zero,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(
+                              height: 15,
+                            ),
+                            itemCount: store.tasks.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              Task task = store.tasks[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  //move to new creen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          TaskScreen(task: task),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding:
+                                      EdgeInsets.all(AppStyle.defaultPadding),
+                                  decoration: BoxDecoration(
+                                      color: AppColor.white,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColor.grey.withOpacity(0.8),
+                                          blurRadius: 3,
+                                          offset: const Offset(4, 4),
+                                        ),
+                                      ],
+                                      borderRadius: BorderRadius.circular(15)),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 15),
+                                        child: CircleAvatar(
+                                          radius: 40,
+                                          backgroundColor:
+                                              Status.getStatus(task.status)!
+                                                  .color,
+                                          foregroundColor: Colors.white,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(5.0),
+                                            child: Text(
+                                              task.status,
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
                                           ),
-                                        ],
-                                        borderRadius:
-                                            BorderRadius.circular(15)),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
@@ -182,6 +205,9 @@ class HomeScreen extends StatelessWidget {
                                                     return Align(
                                                       widthFactor: 0.65,
                                                       child: CircleAvatar(
+                                                        backgroundColor:
+                                                            AppColor
+                                                                .primaryColor,
                                                         radius: 15,
                                                         child: SizedBox(
                                                           child: Image.asset(
@@ -206,118 +232,103 @@ class HomeScreen extends StatelessWidget {
                                             ),
                                           ],
                                         ),
-                                        ProgressCircle(
-                                          taskProgress:
-                                              store.calTaskProgress(task),
-                                          radius: 30,
-                                          fontSize: 14,
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                      ProgressCircle(
+                                        taskProgress:
+                                            store.calTaskProgress(task),
+                                        radius: 30,
+                                        fontSize: 14,
+                                      ),
+                                    ],
                                   ),
-                                );
-                              },
-                            );
-                          }
-                        },
+                                ),
+                              );
+                            },
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          //top part
+          Container(
+            padding: EdgeInsets.all(AppStyle.defaultPadding),
+            height: screenScreen.height * 0.25,
+            decoration: const BoxDecoration(
+              color: AppColor.primaryColor,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(50),
+                bottomRight: Radius.circular(50),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    //intro
+                    Text(
+                      "Hi! Linrada",
+                      style: AppStyle.mainHeading,
+                    ),
+                    //role
+                    Text(
+                      "Project Manager",
+                      style: TextStyle(
+                        color: AppColor.white,
                       ),
                     ),
                   ],
                 ),
-              ),
+                const Icon(
+                  Icons.account_circle,
+                  color: AppColor.white,
+                  size: 50,
+                )
+              ],
             ),
-            //top part
-            Container(
-              padding: EdgeInsets.all(AppStyle.defaultPadding),
-              height: screenScreen.height * 0.25,
-              decoration: const BoxDecoration(
-                color: AppColor.primaryColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(50),
-                  bottomRight: Radius.circular(50),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      //intro
-                      Text(
-                        "Hi! Linrada",
-                        style: AppStyle.mainHeading,
-                      ),
-                      //role
-                      Text(
-                        "Project Manager",
-                        style: TextStyle(
-                          color: AppColor.white,
-                        ),
-                      ),
-                    ],
+          ),
+          //search box
+          Positioned(
+            top: screenScreen.width * 0.42,
+            child: SizedBox(
+              width: screenScreen.width * 0.8,
+              child: TextField(
+                //controller: TextEditingController(text:'data'),
+                style: TextStyle(color: Colors.grey[800]),
+                onChanged: (String text) {
+                  store.setKey(text);
+                },
+                decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: AppColor.grey,
+                  hintText: 'Search...',
+                  suffixIcon: Icon(
+                    Icons.search,
+                    color: AppColor.black,
                   ),
-                  const Icon(
-                    Icons.account_circle,
-                    color: AppColor.white,
-                    size: 50,
-                  )
-                ],
-              ),
-            ),
-            //search box
-            Positioned(
-              top: screenScreen.width * 0.42,
-              child: SizedBox(
-                width: screenScreen.width * 0.8,
-                child: TextField(
-                  //controller: TextEditingController(text:'data'),
-                  style: TextStyle(color: Colors.grey[800]),
-                  onChanged: (String text) {
-                    store.setKey(text);
-                  },
-                  decoration: const InputDecoration(
-                    filled: true,
-                    fillColor: AppColor.grey,
-                    hintText: 'Search...',
-                    suffixIcon: Icon(
-                      Icons.search,
-                      color: AppColor.black,
-                    ),
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
-                      ),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(20.0),
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //move to new creen
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CreateTaskScreen(),
-            ),
-          );
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: const Icon(
-          Icons.add,
-        ),
+          ),
+        ],
       ),
     );
   } //ef
-}
+} //ec
 
 class TaskCategory extends StatelessWidget {
   TaskCategory({

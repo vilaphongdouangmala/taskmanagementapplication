@@ -1,12 +1,14 @@
 import 'dart:convert';
 
+import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:task_management_application/models/Employee.dart';
 import 'package:task_management_application/models/SubTask.dart';
-import 'package:task_management_application/screens/HomePage2.dart';
+import 'package:task_management_application/screens/CreateTaskScreen.dart';
+import 'package:task_management_application/screens/CalendarScreen.dart';
 import 'package:task_management_application/screens/LoginScreen.dart';
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
@@ -17,7 +19,7 @@ import 'models/Task.dart';
 import 'screens/HomeScreen.dart';
 
 class Store extends ChangeNotifier {
-  String connectionUrl = "http://192.168.183.221:1880";
+  String connectionUrl = "http://10.120.59.76:1880";
 
   //employees
   List<Employee> _employees = [];
@@ -34,7 +36,13 @@ class Store extends ChangeNotifier {
   //tasks
   List<Task> _tasks = [];
   List<Task> get tasks {
-    if (_key.isEmpty && _selectedTaskStatus.isEmpty) {
+    if (_selectedDate != null) {
+      return _tasks.where((task) {
+        bool sameDate =
+            calDeadline(task.startDate, task.duration) == _selectedDate;
+        return sameDate;
+      }).toList();
+    } else if (_key.isEmpty && _selectedTaskStatus.isEmpty) {
       return _tasks;
     } else {
       return _tasks.where((task) {
@@ -50,8 +58,26 @@ class Store extends ChangeNotifier {
     } //end if else
   } //ef
 
+  // {
+  //   if (_key.isEmpty && _selectedTaskStatus.isEmpty) {
+  //     return _tasks;
+  //   } else {
+  //     return _tasks.where((task) {
+  //       bool containNameCheck =
+  //           task.taskName.toLowerCase().contains(_key.toLowerCase());
+  //       if (_selectedTaskStatus.isNotEmpty) {
+  //         bool containStatusCheck = task.status == _selectedTaskStatus;
+  //         return containNameCheck && containStatusCheck;
+  //       } else {
+  //         return containNameCheck;
+  //       }
+  //     }).toList();
+  //   } //end if else
+  // } //ef
+
   String _key = "";
   String _selectedTaskStatus = "";
+  DateTime? _selectedDate = null;
 
   void setKey(String key) {
     _key = key;
@@ -66,7 +92,12 @@ class Store extends ChangeNotifier {
       _selectedTaskStatus = status;
     }
     notifyListeners();
-  }
+  } //ef
+
+  void setSelectedDate(DateTime selectedDate) {
+    _selectedDate = selectedDate;
+    notifyListeners();
+  } //ef
 
   void setEmployees(List<Employee> employees) {
     _employees = employees;
@@ -78,9 +109,9 @@ class Store extends ChangeNotifier {
 
   Future<List<Employee>> getEmployees() async {
     if (_employees.isEmpty) {
-      var url = "$connectionUrl/getEmployees";
+      var url = "$connectionUrl/taskmanagement";
       var jsonText = await get(url);
-      var dict = json.decode(jsonText) as List;
+      var dict = json.decode(jsonText)["employees"] as List;
       List<Employee> employees = dict.map((e) => Employee.fromMap(e)).toList();
       setEmployees(employees);
       notifyListeners();
@@ -110,9 +141,9 @@ class Store extends ChangeNotifier {
 
   Future<List<Task>> getTasks({refresh = false}) async {
     if (_tasks.isEmpty || refresh) {
-      var url = "$connectionUrl/getTasks";
+      var url = "$connectionUrl/taskmanagement";
       var jsonText = await get(url);
-      var dict = json.decode(jsonText) as List;
+      var dict = json.decode(jsonText)["tasks"] as List;
       List<Task> tasks = dict.map((e) => Task.fromMap(e)).toList();
       setTasks(tasks);
       notifyListeners();
@@ -133,25 +164,6 @@ class Store extends ChangeNotifier {
   } //ef
 
   //end task region
-
-  // void setDisplayedTasks(List<Task> displayedTasks) {
-  //   _displayedTasks = displayedTasks;
-  // } //ef
-
-  // void getDisplayedTasksByDate({DateTime? filteredDate}) {
-  //   if (filteredDate != null) {
-  //     _displayedTasks.clear();
-  //     String strFilteredDate = AppStyle.dateFormatter.format(filteredDate);
-  //     for (Task t in _tasks) {
-  //       if (t.startDate == strFilteredDate) {
-  //         _displayedTasks.add(t);
-  //       } //eif
-  //     } //eloop
-  //     notifyListeners();
-  //   } else {
-  //     _displayedTasks = _tasks;
-  //   }
-  // } //ef
 
   Future<String> get(url) async {
     var res = await http.get(Uri.parse(url));
@@ -182,6 +194,21 @@ class Store extends ChangeNotifier {
     DateTime convertedStartDate = DateTime.parse(startDate);
     return convertedStartDate.add(Duration(days: day));
   } //ef
+
+  //bottom nav
+  final List<Widget> _tabs = <Widget>[HomeScreen(), CaldendarScreen()];
+  int _bottomNavIndex = 0;
+  int get bottomNavIndex => _bottomNavIndex;
+
+  void setTabChange(int tabIndex) {
+    _bottomNavIndex = tabIndex;
+    notifyListeners();
+  } //ef
+
+  final iconList = <IconData>[
+    Icons.home,
+    Icons.calendar_today,
+  ];
 } //ec
 
 main() {
@@ -190,8 +217,60 @@ main() {
       create: (BuildContext context) => Store(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: LoginScreen(),
+        home: AppMain(),
       ),
     ),
   );
 } //ef
+
+//===> class: AppMain
+class AppMain extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var store = Provider.of<Store>(context);
+    bool showFloatingBtn = MediaQuery.of(context).viewInsets.bottom != 0;
+    return Scaffold(
+      body: store._tabs[store._bottomNavIndex],
+      floatingActionButton: Visibility(
+        visible: !showFloatingBtn,
+        child: FloatingActionButton(
+          onPressed: () {
+            //move to new creen
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreateTaskScreen(),
+              ),
+            );
+          },
+          backgroundColor: AppColor.primaryYellow,
+          child: const Icon(
+            Icons.add,
+            size: 30,
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: AnimatedBottomNavigationBar.builder(
+        backgroundColor: AppColor.primaryColor,
+        activeIndex: store.bottomNavIndex,
+        gapLocation: GapLocation.center,
+        notchSmoothness: NotchSmoothness.softEdge,
+        leftCornerRadius: 20,
+        rightCornerRadius: 20,
+        onTap: (index) => store.setTabChange(index),
+        itemCount: store.iconList.length,
+        tabBuilder: (int index, bool isActive) {
+          final color = isActive
+              ? const Color.fromARGB(255, 255, 206, 150)
+              : AppColor.white;
+          return Icon(
+            store.iconList[index],
+            size: 30,
+            color: color,
+          );
+        },
+      ),
+    );
+  } //ef
+}//ec
