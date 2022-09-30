@@ -41,7 +41,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   //task
   Task creatingTask = Task(
-    id: 0,
     taskName: "taskName",
     taskDescription: "taskDescription",
     status: "status",
@@ -314,8 +313,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       LongButton(
                         text: "Create New Task",
                         press: () async {
-                          //set task information
-                          creatingTask.id = store.tasks.length;
                           creatingTask.taskName = taskNameController.text;
                           creatingTask.taskDescription =
                               taskDescriptionController.text;

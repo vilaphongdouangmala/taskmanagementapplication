@@ -85,7 +85,14 @@ class HomeScreen extends StatelessWidget {
                         if (!snapshot.hasData) {
                           //return progress
                           return const Center(
-                            child: CircularProgressIndicator(),
+                            child: SizedBox(
+                              width: 80,
+                              height: 80,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 5,
+                                color: AppColor.primaryColor,
+                              ),
+                            ),
                           );
                         } else {
                           //return widget

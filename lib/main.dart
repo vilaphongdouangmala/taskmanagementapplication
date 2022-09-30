@@ -19,7 +19,7 @@ import 'models/Task.dart';
 import 'screens/HomeScreen.dart';
 
 class Store extends ChangeNotifier {
-  String connectionUrl = "http://10.120.138.4:1880";
+  String connectionUrl = "http://172.20.10.9:1880";
 
   //employees
   List<Employee> _employees = [];

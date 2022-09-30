@@ -5,7 +5,6 @@ import 'package:task_management_application/models/Employee.dart';
 import 'package:task_management_application/models/SubTask.dart';
 
 class Task {
-  int id;
   String taskName;
   String taskDescription;
   String status;
@@ -14,7 +13,6 @@ class Task {
   List<Employee> assignedPeople;
   List<SubTask> subTasks;
   Task({
-    required this.id,
     required this.taskName,
     required this.taskDescription,
     required this.status,
@@ -25,7 +23,6 @@ class Task {
   });
 
   Task copyWith({
-    int? id,
     String? taskName,
     String? taskDescription,
     String? status,
@@ -35,7 +32,6 @@ class Task {
     List<SubTask>? subTasks,
   }) {
     return Task(
-      id: id ?? this.id,
       taskName: taskName ?? this.taskName,
       taskDescription: taskDescription ?? this.taskDescription,
       status: status ?? this.status,
@@ -48,7 +44,6 @@ class Task {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
       'taskName': taskName,
       'taskDescription': taskDescription,
       'status': status,
@@ -61,7 +56,6 @@ class Task {
 
   factory Task.fromMap(Map<String, dynamic> map) {
     return Task(
-      id: map['id'].toInt() as int,
       taskName: map['taskName'] as String,
       taskDescription: map['taskDescription'] as String,
       status: map['status'] as String,
@@ -87,15 +81,14 @@ class Task {
 
   @override
   String toString() {
-    return 'Task(id: $id, taskName: $taskName, taskDescription: $taskDescription, status: $status, startDate: $startDate, duration: $duration, assignedPeople: $assignedPeople, subTasks: $subTasks)';
+    return 'Task(taskName: $taskName, taskDescription: $taskDescription, status: $status, startDate: $startDate, duration: $duration, assignedPeople: $assignedPeople, subTasks: $subTasks)';
   }
 
   @override
   bool operator ==(covariant Task other) {
     if (identical(this, other)) return true;
 
-    return other.id == id &&
-        other.taskName == taskName &&
+    return other.taskName == taskName &&
         other.taskDescription == taskDescription &&
         other.status == status &&
         other.startDate == startDate &&
@@ -106,8 +99,7 @@ class Task {
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        taskName.hashCode ^
+    return taskName.hashCode ^
         taskDescription.hashCode ^
         status.hashCode ^
         startDate.hashCode ^
