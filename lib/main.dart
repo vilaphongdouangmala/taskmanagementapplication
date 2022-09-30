@@ -19,7 +19,7 @@ import 'models/Task.dart';
 import 'screens/HomeScreen.dart';
 
 class Store extends ChangeNotifier {
-  String connectionUrl = "http://192.168.182.113:1880";
+  String connectionUrl = "http://10.120.138.4:1880";
 
   //employees
   List<Employee> _employees = [];
@@ -36,13 +36,13 @@ class Store extends ChangeNotifier {
   //tasks
   List<Task> _tasks = [];
   List<Task> get tasks {
-    if (_key.isEmpty && _selectedTaskStatus.isEmpty) {
+    if (_key.isEmpty && _selectedTaskStatus == "All") {
       return _tasks;
     } else {
       return _tasks.where((task) {
         bool containNameCheck =
             task.taskName.toLowerCase().contains(_key.toLowerCase());
-        if (_selectedTaskStatus.isNotEmpty) {
+        if (_selectedTaskStatus != "All") {
           bool containStatusCheck = task.status == _selectedTaskStatus;
           return containNameCheck && containStatusCheck;
         } else {
@@ -52,26 +52,10 @@ class Store extends ChangeNotifier {
     } //end if else
   } //ef
 
-  // {
-  //   if (_key.isEmpty && _selectedTaskStatus.isEmpty) {
-  //     return _tasks;
-  //   } else {
-  //     return _tasks.where((task) {
-  //       bool containNameCheck =
-  //           task.taskName.toLowerCase().contains(_key.toLowerCase());
-  //       if (_selectedTaskStatus.isNotEmpty) {
-  //         bool containStatusCheck = task.status == _selectedTaskStatus;
-  //         return containNameCheck && containStatusCheck;
-  //       } else {
-  //         return containNameCheck;
-  //       }
-  //     }).toList();
-  //   } //end if else
-  // } //ef
-
   DateTime _selectedDate = DateTime.now();
+  DateTime get selectedDate => _selectedDate;
   String _key = "";
-  String _selectedTaskStatus = "";
+  String _selectedTaskStatus = "All";
   String get selectedTaskStatus => _selectedTaskStatus;
 
   void update() {
@@ -86,7 +70,7 @@ class Store extends ChangeNotifier {
   void setSelectedTaskStatus(String status) {
     //if user press again we uncategorize
     if (_selectedTaskStatus == status) {
-      _selectedTaskStatus = "";
+      _selectedTaskStatus = "All";
     } else {
       _selectedTaskStatus = status;
     }
@@ -250,8 +234,14 @@ main() {
     ChangeNotifierProvider(
       create: (BuildContext context) => Store(),
       child: MaterialApp(
+        theme: ThemeData(
+          fontFamily: 'Urbanist',
+          textTheme: const TextTheme(
+            bodyText1: TextStyle(fontSize: 16),
+          ),
+        ),
         debugShowCheckedModeBanner: false,
-        home: AppMain(),
+        home: LoginScreen(),
       ),
     ),
   );
@@ -303,9 +293,7 @@ class AppMain extends StatelessWidget {
         onTap: (index) => store.setTabChange(index),
         itemCount: store.iconList.length,
         tabBuilder: (int index, bool isActive) {
-          final color = isActive
-              ? const Color.fromARGB(255, 255, 206, 150)
-              : AppColor.white;
+          final color = isActive ? AppColor.primaryYellow : AppColor.white;
           return Icon(
             store.iconList[index],
             size: 30,

@@ -55,7 +55,7 @@ class TaskScreen extends StatelessWidget {
               decoration: const BoxDecoration(
                 color: AppColor.primaryColor,
               ),
-              height: screenSize.height * 1.15,
+              height: screenSize.height * 1.25,
               width: screenSize.width,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,6 +66,19 @@ class TaskScreen extends StatelessWidget {
                     children: [
                       const ArrowBackButton(),
                       StatusBox(task: task),
+                      // CircleAvatar(
+                      //   backgroundColor: AppColor.white,
+                      //   radius: 25,
+                      //   child: AnimatedContainer(
+                      //     height: 35,
+                      //     width: 35,
+                      //     duration: const Duration(milliseconds: 300),
+                      //     decoration: BoxDecoration(
+                      //       borderRadius: BorderRadius.circular(50),
+                      //       color: Status.getStatus(task.status)!.color,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                   Padding(
@@ -100,70 +113,87 @@ class TaskScreen extends StatelessWidget {
                     topLeft: Radius.circular(40),
                   ),
                 ),
-                height: screenSize.height * 0.85,
+                height: screenSize.height * 0.95,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //Start Date and Deadline
-                    SizedBox(
-                      // width: screenSize.width * 0.5,
+                    Container(
+                      margin: EdgeInsets.only(bottom: AppStyle.defaultPadding),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          InfoBox(
-                            heading: "Start Date",
-                            content: task.startDate,
-                          ),
-                          InfoBox(
-                            heading: "Deadline",
-                            content: AppStyle.dateFormatter.format(
-                              store.calDeadline(task.startDate, task.duration),
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              InfoBox(
+                                heading: "Start Date",
+                                content: task.startDate,
+                              ),
+                              InfoBox(
+                                heading: "Deadline",
+                                content: AppStyle.dateFormatter.format(
+                                  store.calDeadline(
+                                      task.startDate, task.duration),
+                                ),
+                              ),
+                              //Duration
+                              InfoBox(
+                                heading: "Duration",
+                                content: "${task.duration} days",
+                              ),
+                              //Status
+                              SizedBox(
+                                height: 20,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      "Status:",
+                                      style: AppStyle.subHeading_l,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 15),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton2(
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColor.black,
+                                            fontSize: 16,
+                                          ),
+                                          value: selectedValue,
+                                          items: statusTypes
+                                              .map(
+                                                (status) =>
+                                                    DropdownMenuItem<String>(
+                                                  value: status,
+                                                  child: Text(status),
+                                                ),
+                                              )
+                                              .toList(),
+                                          onChanged: (value) {
+                                            task.status = value.toString();
+                                            store.update();
+                                          },
+                                          buttonPadding:
+                                              const EdgeInsets.only(top: 1),
+                                          buttonWidth: 115,
+                                          itemHeight: 40,
+                                          selectedItemHighlightColor:
+                                              selectedStatus.color,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                           ProgressCircle(
                             taskProgress: taskProgress,
                             radius: 40,
                             fontSize: 18,
-                          ),
-                        ],
-                      ),
-                    ),
-                    //Duration
-                    InfoBox(
-                      heading: "Duration",
-                      content: "${task.duration} days",
-                    ),
-                    //Status
-                    Padding(
-                      padding: EdgeInsets.only(
-                          bottom: AppStyle.defaultPadding * 0.5),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Status",
-                            style: AppStyle.subHeading_l,
-                          ),
-                          DropdownButtonHideUnderline(
-                            child: DropdownButton2(
-                              value: selectedValue,
-                              items: statusTypes
-                                  .map(
-                                    (status) => DropdownMenuItem<String>(
-                                      value: status,
-                                      child: Text(status),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (value) {
-                                task.status = value.toString();
-                                store.notifyListeners();
-                              },
-                              buttonHeight: 40,
-                              buttonWidth: 140,
-                              itemHeight: 40,
-                              selectedItemHighlightColor: selectedStatus.color,
-                            ),
                           ),
                         ],
                       ),
@@ -176,271 +206,28 @@ class TaskScreen extends StatelessWidget {
                         children: [
                           Padding(
                             padding: EdgeInsets.only(
-                                bottom: AppStyle.defaultPadding * 0.5),
+                                bottom: AppStyle.defaultPadding * 0.2),
                             child: const Text(
                               "Assignees",
                               style: AppStyle.subHeading_l,
                             ),
                           ),
-                          AssigneeListView(
-                            task: task,
+                          Padding(
+                            padding: EdgeInsets.only(
+                                left: AppStyle.defaultPadding * 0.3),
+                            child: AssigneeListView(
+                              task: task,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    //subTasks
-                    Padding(
-                      padding: EdgeInsets.only(
-                          bottom: AppStyle.defaultPadding * 0.7),
-                      child: const Text(
-                        "Subtasks",
-                        style: AppStyle.subHeading_l,
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.separated(
-                        padding: EdgeInsets.zero,
-                        separatorBuilder: (context, indext) => const SizedBox(
-                          height: 10,
-                        ),
-                        itemCount: task.subTasks.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          SubTask subTask = task.subTasks[index];
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 6, horizontal: 20),
-                            decoration: BoxDecoration(
-                              color: subTask.complete
-                                  ? AppColor.primaryGreen
-                                  : AppColor.primaryYellow,
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-                            ),
-                            child: CheckboxListTile(
-                              side: const BorderSide(
-                                color: AppColor.white,
-                                width: 3,
-                              ),
-                              checkColor: AppColor.black,
-                              activeColor: AppColor.white,
-                              checkboxShape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(100),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: AppStyle.defaultPadding * 0.1),
-                              value: subTask.complete,
-                              title: Text(
-                                subTask.name,
-                                style: AppStyle.semiBoldWhiteText,
-                              ),
-                              subtitle: Text(
-                                "Date: ${subTask.datetime}",
-                                style: const TextStyle(
-                                  color: AppColor.white,
-                                ),
-                              ),
-                              onChanged: (bool? value) {
-                                subTask.complete = value!;
-                                store.notifyListeners();
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        showModalBottomSheet(
-                          isScrollControlled: true,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20),
-                              topRight: Radius.circular(20),
-                            ),
-                          ),
-                          context: context,
-                          builder: (BuildContext context) {
-                            DateTime selectedDate = DateTime.now();
-                            DateTime selectedTime = DateTime.now();
-                            return StatefulBuilder(builder:
-                                (BuildContext context, StateSetter setState) {
-                              return Container(
-                                padding:
-                                    EdgeInsets.all(AppStyle.defaultPadding),
-                                margin: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context)
-                                        .viewInsets
-                                        .bottom),
-                                height: screenSize.height * 0.35,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          bottom:
-                                              AppStyle.defaultPadding * 0.5),
-                                      child: const Text(
-                                        "Enter the subtask name: ",
-                                        style: AppStyle.subHeading_l,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          bottom: AppStyle.defaultPadding),
-                                      child: UnderlineTextBox(
-                                        controller: subTaskNameController,
-                                        hintText: 'Subtask Name',
-                                        onChange: null,
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () async {
-                                            DateTime? time = await datePicker(
-                                                context, selectedDate);
-                                            if (time == null) {
-                                              return;
-                                            } else if (time
-                                                .isBefore(DateTime.now())) {
-                                              showDialog(
-                                                context: context,
-                                                builder: (context) {
-                                                  return const AlertPopup(
-                                                    contentText:
-                                                        "The date cannot be before current date.",
-                                                  );
-                                                },
-                                              );
-                                            } else {
-                                              setState(() {
-                                                selectedDate = time;
-                                              });
-                                            }
-                                          },
-                                          child: DateTimeBox(
-                                            screenSize: screenSize,
-                                            icon: const Icon(
-                                              Icons.edit_calendar,
-                                              color: AppColor.black,
-                                            ),
-                                            dateTime: AppStyle.dateFormatter
-                                                .format(selectedDate),
-                                          ),
-                                        ),
-                                        //timepicker
-                                        GestureDetector(
-                                          onTap: () {
-                                            DatePicker.showTimePicker(
-                                              context,
-                                              showSecondsColumn: false,
-                                              currentTime: selectedTime,
-                                              onConfirm: (time) {
-                                                setState(() {
-                                                  selectedTime = time;
-                                                });
-                                              },
-                                            );
-                                          },
-                                          child: DateTimeBox(
-                                            screenSize: screenSize,
-                                            icon: const Icon(
-                                              Icons.access_time,
-                                            ),
-                                            dateTime: AppStyle.timeFormatter
-                                                .format(selectedTime),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          top: AppStyle.defaultPadding),
-                                      child: LongButton(
-                                        press: () async {
-                                          if (subTaskNameController
-                                              .text.isNotEmpty) {
-                                            SubTask newSubTask = SubTask(
-                                              id: task.subTasks.length + 1,
-                                              name: subTaskNameController.text,
-                                              complete: false,
-                                              datetime: AppStyle
-                                                  .dateTimeFormatter
-                                                  .format(
-                                                selectedDate.add(
-                                                  Duration(
-                                                    hours: selectedTime.hour,
-                                                    minutes:
-                                                        selectedTime.minute,
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                            task.subTasks.add(newSubTask);
-                                            store.update();
-                                            //show confirmation dialog
-                                            await showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return AlertDialog(
-                                                  content: SizedBox(
-                                                    height: 85,
-                                                    child: Column(
-                                                      children: [
-                                                        const Icon(
-                                                          Icons
-                                                              .check_circle_outline_outlined,
-                                                          size: 50,
-                                                          color: AppColor
-                                                              .primaryGreen,
-                                                        ),
-                                                        Padding(
-                                                          padding: EdgeInsets.only(
-                                                              top: AppStyle
-                                                                      .defaultPadding *
-                                                                  0.5),
-                                                          child: const Text(
-                                                              "Sucessfully created the subtask"),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                            //pop after creating the subtask
-                                            Navigator.pop(context);
-                                          } else {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return const AlertPopup(
-                                                  contentText:
-                                                      "Please enter the subtask name",
-                                                );
-                                              },
-                                            );
-                                          }
-                                        },
-                                        text: 'Create a new subtask',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            });
-                          },
-                        );
-                      },
-                      child: Padding(
-                        padding:
-                            EdgeInsets.only(top: AppStyle.defaultPadding * 0.5),
-                        child: const Text("+ Add a new subtask"),
-                      ),
+                    //subtasks
+                    SubtaskWidget(
+                      task: task,
+                      store: store,
+                      screenSize: screenSize,
+                      subTaskNameController: subTaskNameController,
                     ),
                   ],
                 ),
@@ -451,6 +238,334 @@ class TaskScreen extends StatelessWidget {
       ),
     );
   } //ef
+}
+
+class SubtaskWidget extends StatelessWidget {
+  const SubtaskWidget({
+    Key? key,
+    required this.task,
+    required this.store,
+    required this.screenSize,
+    required this.subTaskNameController,
+  }) : super(key: key);
+
+  final Task task;
+  final Store store;
+  final Size screenSize;
+  final TextEditingController subTaskNameController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        //subTasks
+        Padding(
+          padding: EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.7),
+          child: const Text(
+            "Subtasks",
+            style: AppStyle.subHeading_l,
+          ),
+        ),
+        SubtaskListView(
+          task: task,
+          store: store,
+          screenSize: screenSize,
+          subTaskNameController: subTaskNameController,
+        ),
+      ],
+    );
+  }
+}
+
+class AddSubtask extends StatelessWidget {
+  const AddSubtask({
+    Key? key,
+    required this.screenSize,
+    required this.subTaskNameController,
+    required this.task,
+    required this.store,
+  }) : super(key: key);
+
+  final Size screenSize;
+  final TextEditingController subTaskNameController;
+  final Task task;
+  final Store store;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          context: context,
+          builder: (BuildContext context) {
+            DateTime selectedDate = DateTime.now();
+            DateTime selectedTime = DateTime.now();
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Container(
+                  padding: EdgeInsets.all(AppStyle.defaultPadding),
+                  margin: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom),
+                  height: screenSize.height * 0.35,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                            bottom: AppStyle.defaultPadding * 0.5),
+                        child: const Text(
+                          "Enter the subtask name: ",
+                          style: AppStyle.subHeading_l,
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            EdgeInsets.only(bottom: AppStyle.defaultPadding),
+                        child: UnderlineTextBox(
+                          controller: subTaskNameController,
+                          hintText: 'Subtask Name',
+                          onChange: null,
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              DateTime? time =
+                                  await datePicker(context, selectedDate);
+                              if (time == null) {
+                                return;
+                              } else if (time.isBefore(DateTime.now())) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return const AlertPopup(
+                                      contentText:
+                                          "The date cannot be before current date.",
+                                    );
+                                  },
+                                );
+                              } else {
+                                setState(() {
+                                  selectedDate = time;
+                                });
+                              }
+                            },
+                            child: DateTimeBox(
+                              screenSize: screenSize,
+                              icon: const Icon(
+                                Icons.edit_calendar,
+                                color: AppColor.black,
+                              ),
+                              dateTime:
+                                  AppStyle.dateFormatter.format(selectedDate),
+                            ),
+                          ),
+                          //timepicker
+                          GestureDetector(
+                            onTap: () {
+                              DatePicker.showTimePicker(
+                                context,
+                                showSecondsColumn: false,
+                                currentTime: selectedTime,
+                                onConfirm: (time) {
+                                  setState(() {
+                                    selectedTime = time;
+                                  });
+                                },
+                              );
+                            },
+                            child: DateTimeBox(
+                              screenSize: screenSize,
+                              icon: const Icon(
+                                Icons.access_time,
+                              ),
+                              dateTime:
+                                  AppStyle.timeFormatter.format(selectedTime),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: AppStyle.defaultPadding),
+                        child: LongButton(
+                          press: () async {
+                            if (subTaskNameController.text.isNotEmpty) {
+                              SubTask newSubTask = SubTask(
+                                id: task.subTasks.length + 1,
+                                name: subTaskNameController.text,
+                                complete: false,
+                                datetime: AppStyle.dateTimeFormatter.format(
+                                  selectedDate.add(
+                                    Duration(
+                                      hours: selectedTime.hour,
+                                      minutes: selectedTime.minute,
+                                    ),
+                                  ),
+                                ),
+                              );
+                              task.subTasks.add(newSubTask);
+                              store.update();
+                              //show confirmation dialog
+                              await showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    content: SizedBox(
+                                      height: 85,
+                                      child: Column(
+                                        children: [
+                                          const Icon(
+                                            Icons.check_circle_outline_outlined,
+                                            size: 50,
+                                            color: AppColor.primaryGreen,
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                top: AppStyle.defaultPadding *
+                                                    0.5),
+                                            child: const Text(
+                                                "Sucessfully created the subtask"),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                              //pop after creating the subtask
+                              Navigator.pop(context);
+                            } else {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return const AlertPopup(
+                                    contentText:
+                                        "Please enter the subtask name",
+                                  );
+                                },
+                              );
+                            }
+                          },
+                          text: 'Create a new subtask',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+      child: Padding(
+        padding: EdgeInsets.only(top: AppStyle.defaultPadding * 0.3),
+        child: const CircleAvatar(
+          radius: 25,
+          backgroundColor: AppColor.primaryColor,
+          foregroundColor: AppColor.white,
+          child: Icon(
+            Icons.add,
+            size: 35,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SubtaskListView extends StatelessWidget {
+  const SubtaskListView({
+    Key? key,
+    required this.task,
+    required this.store,
+    required this.screenSize,
+    required this.subTaskNameController,
+  }) : super(key: key);
+
+  final Task task;
+  final Store store;
+  final Size screenSize;
+  final TextEditingController subTaskNameController;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height:
+          task.subTasks.length >= 3 ? 350 : (100 * task.subTasks.length + 60),
+      child: ListView.separated(
+        padding: EdgeInsets.zero,
+        separatorBuilder: (context, index) => const SizedBox(
+          height: 10,
+        ),
+        itemCount: task.subTasks.length + 1,
+        itemBuilder: (BuildContext context, int index) {
+          if (index < task.subTasks.length) {
+            SubTask subTask = task.subTasks[index];
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
+              decoration: BoxDecoration(
+                color: subTask.complete
+                    ? AppColor.primaryGreen
+                    : AppColor.primaryYellow,
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(20),
+                ),
+              ),
+              child: CheckboxListTile(
+                side: const BorderSide(
+                  color: AppColor.white,
+                  width: 3,
+                ),
+                checkColor: AppColor.black,
+                activeColor: AppColor.white,
+                checkboxShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: AppStyle.defaultPadding * 0.1),
+                value: subTask.complete,
+                title: Text(
+                  subTask.name,
+                  style: AppStyle.semiBoldWhiteText,
+                ),
+                subtitle: Text(
+                  "Date: ${subTask.datetime}",
+                  style: const TextStyle(
+                    color: AppColor.white,
+                  ),
+                ),
+                onChanged: (bool? value) {
+                  subTask.complete = value!;
+                  store.update();
+                },
+              ),
+            );
+          } else {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: AddSubtask(
+                screenSize: screenSize,
+                subTaskNameController: subTaskNameController,
+                task: task,
+                store: store,
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
 } //ec
 
 class DateTimeBox extends StatelessWidget {
@@ -487,5 +602,4 @@ class DateTimeBox extends StatelessWidget {
       ),
     );
   }
-}//ec
-
+} //ec

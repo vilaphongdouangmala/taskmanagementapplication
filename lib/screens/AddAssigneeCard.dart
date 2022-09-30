@@ -1,9 +1,11 @@
 //===> class: AddAssigneeCard
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_management_application/components/LongButton.dart';
 import 'package:task_management_application/models/Employee.dart';
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../main.dart';
 import '../models/Task.dart';
@@ -37,8 +39,8 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
     }
     return Padding(
       padding: EdgeInsets.symmetric(
-          vertical: screenSize.height * 0.10,
-          horizontal: screenSize.width * 0.08),
+          vertical: screenSize.height * 0.065,
+          horizontal: screenSize.width * 0.06),
       child: Hero(
         tag: 'assign',
         child: Material(
@@ -48,94 +50,72 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
           ),
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: screenSize.width * 0.7,
                     child: Padding(
                       padding: EdgeInsets.only(
-                          bottom: AppStyle.defaultPadding * 0.5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Assign Employees",
-                            style: AppStyle.subHeading_b,
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text(
-                              "Done",
-                              style: AppStyle.pagePopText,
-                            ),
-                          ),
-                        ],
+                          bottom: AppStyle.defaultPadding * 0.7),
+                      child: const Text(
+                        "Assign Employees",
+                        style: AppStyle.subHeading_b,
                       ),
                     ),
                   ),
-                  Padding(
-                    padding:
-                        EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.5),
-                    child: Text(
-                      widget.task.taskName,
-                    ),
+                  const ListTileTitle(
+                    text: "Current Assignees: ",
                   ),
                   Padding(
                     padding:
-                        EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.5),
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: AppColor.grey,
-                      ),
-                      height: 150,
-                      width: screenSize.width * 0.7,
+                        EdgeInsets.only(bottom: AppStyle.defaultPadding * 1.5),
+                    child: SizedBox(
+                      height: screenSize.height * 0.25,
                       child: ListView.separated(
+                        padding: const EdgeInsets.all(0),
                         separatorBuilder: (context, index) => const SizedBox(
                           height: 10,
                         ),
                         itemCount: widget.task.assignedPeople.length,
                         itemBuilder: (context, i) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Employee assignee = widget.task.assignedPeople[i];
+                          return Slidable(
+                            key: UniqueKey(),
+                            endActionPane: ActionPane(
+                              motion: const StretchMotion(),
                               children: [
-                                Text(
-                                  widget.task.assignedPeople[i].name,
-                                ),
-                                Text(
-                                  widget.task.assignedPeople[i].role,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    store.availableEmployees.add(
-                                      widget.task.assignedPeople[i],
-                                    );
-                                    widget.task.assignedPeople.remove(
-                                      widget.task.assignedPeople[i],
-                                    );
-                                    store.notifyListeners();
+                                SlidableAction(
+                                  backgroundColor: AppColor.primaryColor,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.delete,
+                                  label: 'Remove',
+                                  onPressed: (context) {
+                                    removeAssignees(assignee);
                                   },
-                                  child: const CircleAvatar(
-                                    radius: 15,
-                                    child: Icon(
-                                      Icons.remove,
-                                    ),
-                                  ),
                                 ),
                               ],
+                            ),
+                            child: EmployeeListTile(
+                              employee: assignee,
+                              icon: null,
                             ),
                           );
                         },
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: screenSize.width * 0.7,
+                  Padding(
+                    padding:
+                        EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.2),
+                    child: const ListTileTitle(
+                      text: "Available Employees: ",
+                    ),
+                  ),
+                  Container(
+                    margin:
+                        EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.5),
                     height: 40,
                     child: TextField(
                       controller: searchBox,
@@ -144,16 +124,22 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
                         getDisplayedEmployees(text);
                       },
                       decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.all(10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                         hintText: 'Search...',
                       ),
                     ),
                   ),
+
                   //available employees
-                  SizedBox(
-                    height: 200,
-                    width: screenSize.width * 0.7,
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    height: screenSize.height * 0.25,
                     child: FutureBuilder<List<Object>>(
                       future: store.getEmployees(),
                       builder: (context, snapshot) {
@@ -164,37 +150,30 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
                           );
                         } else {
                           //return widget
-                          return ListView.builder(
+                          return ListView.separated(
+                            padding: const EdgeInsets.all(0),
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(
+                              height: 10,
+                            ),
                             itemCount: displayedEmployees.length,
                             itemBuilder: (BuildContext context, int i) {
-                              return Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    displayedEmployees[i].name,
-                                  ),
-                                  Text(
-                                    displayedEmployees[i].role,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      widget.task.assignedPeople.add(
-                                        store.availableEmployees[i],
-                                      );
-                                      store.availableEmployees.remove(
-                                        store.availableEmployees[i],
-                                      );
-                                      store.notifyListeners();
-                                    },
-                                    child: const CircleAvatar(
-                                      radius: 15,
-                                      child: Icon(
-                                        Icons.add,
-                                      ),
+                              Employee employee = displayedEmployees[i];
+                              return EmployeeListTile(
+                                employee: employee,
+                                icon: GestureDetector(
+                                  onTap: () {
+                                    addAssignees(store.availableEmployees[i]);
+                                  },
+                                  child: const CircleAvatar(
+                                    backgroundColor: AppColor.primaryColor,
+                                    foregroundColor: AppColor.white,
+                                    radius: 17,
+                                    child: Icon(
+                                      Icons.add,
                                     ),
                                   ),
-                                ],
+                                ),
                               );
                             },
                           );
@@ -202,6 +181,11 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
                       },
                     ),
                   ),
+                  LongButton(
+                      press: () {
+                        Navigator.pop(context);
+                      },
+                      text: 'Done')
                 ],
               ),
             ),
@@ -209,21 +193,29 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
         ),
       ),
     );
+  } //ef
+
+  void removeAssignees(Employee employee) {
+    store.availableEmployees.add(
+      employee,
+    );
+    widget.task.assignedPeople.remove(
+      employee,
+    );
+    store.update();
+  } //ef
+
+  void addAssignees(Employee employee) {
+    widget.task.assignedPeople.add(
+      employee,
+    );
+    store.availableEmployees.remove(
+      employee,
+    );
+    store.update();
   }
 
-  //ef
   void getDisplayedEmployees(String searchedName) {
-    // _displayedEmployees.clear();
-    // if (employeeName.isEmpty) {
-    //   _displayedEmployees = _availableEmployees;
-    // } else {
-    //   for (Employee e in _availableEmployees) {
-    //     if (e.name.toLowerCase().contains(employeeName.toLowerCase())) {
-    //       _displayedEmployees.add(e);
-    //     } //end if
-    //   } //eloop
-    // } //end if else
-
     List<Employee> searchedEmployees = store.availableEmployees.where((e) {
       final employeeName = e.name.toLowerCase();
       final query = searchedName.toLowerCase();
@@ -233,4 +225,61 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
       displayedEmployees = searchedEmployees;
     });
   } //ef
+}
+
+class ListTileTitle extends StatelessWidget {
+  const ListTileTitle({
+    Key? key,
+    required this.text,
+  }) : super(key: key);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.5),
+      child: Text(
+        text,
+      ),
+    );
+  }
+}
+
+class EmployeeListTile extends StatelessWidget {
+  const EmployeeListTile({
+    Key? key,
+    required this.employee,
+    required this.icon,
+  }) : super(key: key);
+
+  final Employee employee;
+  final GestureDetector? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 70,
+      decoration: const BoxDecoration(
+        color: AppColor.grey,
+        borderRadius: BorderRadius.all(
+          Radius.circular(10),
+        ),
+      ),
+      child: ListTile(
+        leading: SizedBox(
+          width: 40,
+          child: CircleAvatar(
+            backgroundColor: Colors.transparent,
+            backgroundImage: AssetImage(
+              employee.image,
+            ),
+          ),
+        ),
+        title: Text(employee.name),
+        subtitle: Text(employee.role),
+        trailing: icon,
+      ),
+    );
+  }
 }//ec

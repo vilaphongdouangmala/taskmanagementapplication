@@ -23,56 +23,78 @@ class AssigneeListView extends StatelessWidget {
         SizedBox(
           height: 60,
           width: screenSize.width * 0.7,
-          child: ListView.separated(
+          child: ListView.builder(
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
-            separatorBuilder: (context, index) => const SizedBox(
-              width: 20,
-            ),
-            itemCount: task.assignedPeople.length,
+            itemCount: task.assignedPeople.length + 1,
             itemBuilder: (context, i) {
-              Employee assignedPeople = task.assignedPeople[i];
-              return Column(
-                children: [
-                  CircleAvatar(
+              if (i < task.assignedPeople.length) {
+                Employee assignedPeople = task.assignedPeople[i];
+                return Align(
+                  widthFactor: 0.65,
+                  child: CircleAvatar(
+                    radius: 23,
+                    backgroundColor: AppColor.primaryColor,
                     backgroundImage: AssetImage(
                       assignedPeople.image,
                     ),
                   ),
-                  Text(
-                    assignedPeople.name,
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 20),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                HeroDialogRoute(
-                  builder: (context) {
-                    return AddAssigneeCard(
-                      task: task,
+                );
+              } else {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      HeroDialogRoute(
+                        builder: (context) {
+                          return AddAssigneeCard(
+                            task: task,
+                          );
+                        },
+                      ),
                     );
                   },
-                ),
-              );
+                  child: const Hero(
+                    tag: 'assign',
+                    child: CircleAvatar(
+                      radius: 23,
+                      backgroundColor: AppColor.primaryColor,
+                      child: Icon(
+                        Icons.add,
+                        color: AppColor.white,
+                      ),
+                    ),
+                  ),
+                );
+              }
             },
-            child: const Hero(
-              tag: 'assign',
-              child: CircleAvatar(
-                backgroundColor: AppColor.primaryColor,
-                child: Icon(
-                  Icons.add,
-                  color: AppColor.white,
-                ),
-              ),
-            ),
           ),
         ),
+        // Padding(
+        //   padding: const EdgeInsets.only(left: 20),
+        //   child: GestureDetector(
+        //     onTap: () {
+        //       Navigator.of(context).push(
+        //         HeroDialogRoute(
+        //           builder: (context) {
+        //             return AddAssigneeCard(
+        //               task: task,
+        //             );
+        //           },
+        //         ),
+        //       );
+        //     },
+        //     child: const Hero(
+        //       tag: 'assign',
+        //       child: CircleAvatar(
+        //         backgroundColor: AppColor.primaryColor,
+        //         child: Icon(
+        //           Icons.add,
+        //           color: AppColor.white,
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   } //ef

@@ -73,8 +73,8 @@ class HomeScreen extends StatelessWidget {
                   Padding(
                     padding:
                         EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.1),
-                    child: const Text(
-                      "Upcoming Tasks",
+                    child: Text(
+                      "Upcoming Tasks - ${store.selectedTaskStatus}",
                       style: AppStyle.mainHeadingBlack,
                     ),
                   ),
@@ -220,9 +220,20 @@ class HomeScreen extends StatelessWidget {
                                                     return Align(
                                                       widthFactor: 0.65,
                                                       child: CircleAvatar(
+                                                        backgroundColor:
+                                                            AppColor
+                                                                .primaryColor,
+                                                        foregroundColor:
+                                                            AppColor.white,
                                                         radius: 15,
                                                         child: Text(
                                                           "+${task.assignedPeople.length - 3}",
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
                                                         ),
                                                       ),
                                                     );
@@ -346,7 +357,8 @@ class TaskCategory extends StatelessWidget {
       onTap: () {
         store.setSelectedTaskStatus(status);
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         width: 140,
         height: 100,
         decoration: BoxDecoration(
@@ -358,7 +370,7 @@ class TaskCategory extends StatelessWidget {
             ),
           ],
           color: (store.selectedTaskStatus == statusObj!.status ||
-                  store.selectedTaskStatus == "")
+                  store.selectedTaskStatus == "All")
               ? statusObj.color
               : AppColor.darkGrey,
           borderRadius: BorderRadius.circular(20),

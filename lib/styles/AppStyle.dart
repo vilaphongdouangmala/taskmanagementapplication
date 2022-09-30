@@ -16,6 +16,18 @@ class AppStyle {
     color: AppColor.primaryColor,
   );
 
+  //login page
+  static const loginHeader = TextStyle(
+    color: AppColor.black,
+    fontSize: 25,
+    fontWeight: FontWeight.bold,
+  );
+
+  static const loginText = TextStyle(
+    color: AppColor.black,
+    fontSize: 14,
+  );
+
   //headings
   static const mainHeading = TextStyle(
     fontWeight: FontWeight.bold,
@@ -32,6 +44,7 @@ class AppStyle {
   static const subHeading_l = TextStyle(
     fontSize: 18,
     color: AppColor.black,
+    fontWeight: FontWeight.bold,
   );
   static const subHeading_b = TextStyle(
     fontSize: 18,
@@ -48,7 +61,7 @@ class AppStyle {
 
   static const semiBoldWhiteText = TextStyle(
     color: AppColor.white,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w800,
     fontSize: 18,
   );
 
@@ -60,10 +73,17 @@ class AppStyle {
   static const buttonText = TextStyle(
     fontSize: 18,
     color: AppColor.white,
+    fontWeight: FontWeight.bold,
   );
 
   //task screen
   static const taskStatus = TextStyle(
     fontWeight: FontWeight.bold,
+  );
+
+  //calendar
+  static const horizontalDatePickerStyle = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 12,
   );
 }//ec

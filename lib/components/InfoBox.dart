@@ -18,18 +18,19 @@ class InfoBox extends StatelessWidget {
       padding: EdgeInsets.only(
         bottom: AppStyle.defaultPadding,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Text(
+            "$heading:",
+            style: AppStyle.subHeading_l,
+          ),
           Padding(
-            padding: EdgeInsets.only(bottom: AppStyle.defaultPadding * 0.25),
+            padding: const EdgeInsets.only(left: 15),
             child: Text(
-              heading,
+              content,
               style: AppStyle.subHeading_l,
             ),
-          ),
-          Text(
-            content,
           )
         ],
       ),

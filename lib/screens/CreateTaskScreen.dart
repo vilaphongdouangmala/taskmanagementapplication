@@ -1,9 +1,11 @@
 //===> class: #name#
+import 'package:date_picker_timeline/extra/color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_management_application/components/AssigneeListView.dart';
 import 'package:task_management_application/models/Employee.dart';
 import 'package:task_management_application/models/SubTask.dart';
+import 'package:task_management_application/screens/TaskScreen.dart';
 
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
@@ -52,6 +54,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
+    TextEditingController subTaskNameController = TextEditingController();
     store = Provider.of<Store>(context);
     return Scaffold(
       body: GestureDetector(
@@ -73,29 +76,56 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                 decoration: const BoxDecoration(
                   color: AppColor.primaryColor,
                 ),
-                height: screenSize.height,
+                height: screenSize.height * 1.40,
                 width: screenSize.width,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      // ignore: prefer_const_literals_to_create_immutables
-                      children: [
-                        const ArrowBackButton(),
-                        const Icon(
-                          Icons.account_circle,
-                          color: AppColor.white,
-                          size: 35,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: const [
+                        ArrowBackButton(),
+                        Padding(
+                          padding: EdgeInsets.only(left: 15),
+                          child: Text(
+                            "Create a New Task",
+                            style: AppStyle.mainHeading,
+                          ),
                         ),
                       ],
                     ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        "Create a New Task",
-                        style: AppStyle.mainHeading,
+                    //task name
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: AppStyle.defaultPadding),
+                      child: TextField(
+                        controller: taskNameController,
+                        style: const TextStyle(
+                          color: AppColor.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.all(5),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColor.white,
+                              width: 2,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColor.white,
+                              width: 2,
+                            ),
+                          ),
+                          hintText: 'Task Name',
+                          hintStyle: TextStyle(
+                            color: AppColor.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          focusColor: AppColor.white,
+                        ),
                       ),
                     ),
                   ],
@@ -107,7 +137,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                 right: 0,
                 child: Container(
                   padding: EdgeInsets.all(AppStyle.defaultPadding * 1.2),
-                  height: screenSize.height * 0.8,
+                  height: screenSize.height * 1.15,
                   width: screenSize.width,
                   decoration: const BoxDecoration(
                     color: AppColor.white,
@@ -119,17 +149,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      //task name
-                      Padding(
-                        padding:
-                            EdgeInsets.only(bottom: AppStyle.defaultPadding),
-                        child: UnderlineTextBox(
-                          controller: taskNameController,
-                          hintText: 'Task Name',
-                          onChange: null,
-                        ),
-                      ),
-
                       //task description
                       Padding(
                         padding:
@@ -238,6 +257,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                       width: screenSize.width * 0.3,
                                       height: 40,
                                       child: TextField(
+                                        keyboardType: TextInputType.number,
                                         controller: durationController,
                                         style:
                                             TextStyle(color: Colors.grey[800]),
@@ -258,7 +278,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       ),
                       Padding(
                         padding: EdgeInsets.only(
-                            bottom: AppStyle.defaultPadding * 1.7),
+                            bottom: AppStyle.defaultPadding * 0.7),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -270,10 +290,24 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 style: AppStyle.subHeading_l,
                               ),
                             ),
-                            AssigneeListView(
-                              task: creatingTask,
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  left: AppStyle.defaultPadding * 0.3),
+                              child: AssigneeListView(
+                                task: creatingTask,
+                              ),
                             ),
                           ],
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            EdgeInsets.only(bottom: AppStyle.defaultPadding),
+                        child: SubtaskWidget(
+                          task: creatingTask,
+                          store: store,
+                          screenSize: screenSize,
+                          subTaskNameController: subTaskNameController,
                         ),
                       ),
                       //create button
@@ -291,7 +325,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           creatingTask.duration =
                               int.parse(durationController.text);
                           //assigned people are set in listview
-
                           //add task
                           store.setNewTask(creatingTask);
 

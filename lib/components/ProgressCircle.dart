@@ -32,6 +32,7 @@ class ProgressCircle extends StatelessWidget {
         "${(taskProgress * 100).round()}%",
         style: TextStyle(
           fontSize: fontSize,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
