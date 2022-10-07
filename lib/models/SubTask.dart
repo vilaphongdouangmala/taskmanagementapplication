@@ -5,11 +5,13 @@ class SubTask {
   final String name;
   bool complete;
   String datetime;
+  int taskId;
   SubTask({
     required this.id,
     required this.name,
     required this.complete,
     required this.datetime,
+    required this.taskId,
   });
 
   SubTask copyWith({
@@ -17,12 +19,14 @@ class SubTask {
     String? name,
     bool? complete,
     String? datetime,
+    int? taskId,
   }) {
     return SubTask(
       id: id ?? this.id,
       name: name ?? this.name,
       complete: complete ?? this.complete,
       datetime: datetime ?? this.datetime,
+      taskId: taskId ?? this.taskId,
     );
   }
 
@@ -32,6 +36,7 @@ class SubTask {
       'name': name,
       'complete': complete,
       'datetime': datetime,
+      'taskId': taskId,
     };
   }
 
@@ -39,8 +44,9 @@ class SubTask {
     return SubTask(
       id: map['id'].toInt() as int,
       name: map['name'] as String,
-      complete: map['complete'] as bool,
+      complete: map['complete'] == 0 ? false : true,
       datetime: map['datetime'] as String,
+      taskId: map['taskId'].toInt() as int,
     );
   }
 
@@ -51,7 +57,7 @@ class SubTask {
 
   @override
   String toString() {
-    return 'SubTask(id: $id, name: $name, complete: $complete, datetime: $datetime)';
+    return 'SubTask(id: $id, name: $name, complete: $complete, datetime: $datetime, taskId: $taskId)';
   }
 
   @override
@@ -61,11 +67,16 @@ class SubTask {
     return other.id == id &&
         other.name == name &&
         other.complete == complete &&
-        other.datetime == datetime;
+        other.datetime == datetime &&
+        other.taskId == taskId;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^ name.hashCode ^ complete.hashCode ^ datetime.hashCode;
+    return id.hashCode ^
+        name.hashCode ^
+        complete.hashCode ^
+        datetime.hashCode ^
+        taskId.hashCode;
   }
 }

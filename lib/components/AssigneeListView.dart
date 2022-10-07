@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:task_management_application/models/AssignedEmployee.dart';
 import 'package:task_management_application/styles/AppColor.dart';
 
+import '../main.dart';
 import '../models/Employee.dart';
 import '../models/Task.dart';
 import '../screens/AddAssigneeCard.dart';
@@ -17,6 +20,9 @@ class AssigneeListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
+    var store = Provider.of<Store>(context);
+    List<Employee> assignedEmployees =
+        store.getAssignedEmployeesByTask(task.id);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -26,10 +32,10 @@ class AssigneeListView extends StatelessWidget {
           child: ListView.builder(
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
-            itemCount: task.assignedPeople.length + 1,
+            itemCount: assignedEmployees.length + 1,
             itemBuilder: (context, i) {
-              if (i < task.assignedPeople.length) {
-                Employee assignedPeople = task.assignedPeople[i];
+              if (i < assignedEmployees.length) {
+                Employee assignedPeople = assignedEmployees[i];
                 return Align(
                   widthFactor: 0.65,
                   child: CircleAvatar(
@@ -41,30 +47,34 @@ class AssigneeListView extends StatelessWidget {
                   ),
                 );
               } else {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      HeroDialogRoute(
-                        builder: (context) {
-                          return AddAssigneeCard(
-                            task: task,
-                          );
-                        },
-                      ),
-                    );
-                  },
-                  child: const Hero(
-                    tag: 'assign',
-                    child: CircleAvatar(
-                      radius: 23,
-                      backgroundColor: AppColor.primaryColor,
-                      child: Icon(
-                        Icons.add,
-                        color: AppColor.white,
+                if (store.user.role.toLowerCase() == "manager") {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        HeroDialogRoute(
+                          builder: (context) {
+                            return AddAssigneeCard(
+                              task: task,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: const Hero(
+                      tag: 'assign',
+                      child: CircleAvatar(
+                        radius: 23,
+                        backgroundColor: AppColor.primaryColor,
+                        child: Icon(
+                          Icons.add,
+                          color: AppColor.white,
+                        ),
                       ),
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  return Container();
+                }
               }
             },
           ),

@@ -29,7 +29,7 @@ class ProgressCircle extends StatelessWidget {
       backgroundColor: AppColor.grey,
       circularStrokeCap: CircularStrokeCap.round,
       center: Text(
-        "${(taskProgress * 100).round()}%",
+        "${(taskProgress * 100).toInt()}%",
         style: TextStyle(
           fontSize: fontSize,
           fontWeight: FontWeight.bold,

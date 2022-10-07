@@ -41,13 +41,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   //task
   Task creatingTask = Task(
+    id: 0,
     taskName: "taskName",
     taskDescription: "taskDescription",
     status: "status",
     startDate: "startDate",
     duration: 0,
-    assignedPeople: [],
-    subTasks: [],
   );
 
   @override
@@ -55,6 +54,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     Size screenSize = MediaQuery.of(context).size;
     TextEditingController subTaskNameController = TextEditingController();
     store = Provider.of<Store>(context);
+    store.setTaskId(creatingTask.id); //set it to not query anything
     return Scaffold(
       body: GestureDetector(
         onTap: () {
@@ -307,6 +307,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           store: store,
                           screenSize: screenSize,
                           subTaskNameController: subTaskNameController,
+                          insertType: "temp",
                         ),
                       ),
                       //create button

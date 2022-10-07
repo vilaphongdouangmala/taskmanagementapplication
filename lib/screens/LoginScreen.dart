@@ -2,8 +2,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:task_management_application/components/LongButton.dart';
 import 'package:task_management_application/main.dart';
+import 'package:task_management_application/models/Employee.dart';
 import 'package:task_management_application/screens/HomeScreen.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
 import 'package:http/http.dart' as http;
@@ -17,6 +19,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
+    var store = Provider.of<Store>(context);
     return Scaffold(
       body: Stack(
         children: [
@@ -106,6 +109,7 @@ class LoginScreen extends StatelessWidget {
                       child: TextField(
                         controller: passwordController,
                         style: AppStyle.loginText,
+                        obscureText: true,
                         onChanged: (String text) {},
                         decoration: const InputDecoration(
                           prefixIcon: Icon(
@@ -149,6 +153,7 @@ class LoginScreen extends StatelessWidget {
                               usernameController,
                               passwordController,
                               context,
+                              store,
                             );
                           },
                           child: const Text('Login'),
@@ -175,12 +180,11 @@ class LoginScreen extends StatelessWidget {
   } //ef
 } //ec
 
-Future<void> verifylogin(cusername, cpassword, context) async {
+Future<void> verifylogin(cusername, cpassword, context, store) async {
   //1. define url
-  var url = "http://172.20.10.9:1880/taskmanagementlogin";
+  var url = "http://192.168.182.224:1880/taskmanagementlogin";
 
   //2. convert list of objects to list of dictionary
-
   var loginInfo = {
     "username": cusername.text,
     "password": cpassword.text,
@@ -199,6 +203,7 @@ Future<void> verifylogin(cusername, cpassword, context) async {
 
   var dict = json.decode(result);
   if (dict["result"] == "matched") {
+    store.setUser(Employee.fromMap(dict["data"]));
     //move to main screen
     Navigator.push(
       context,

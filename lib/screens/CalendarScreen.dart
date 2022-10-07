@@ -183,12 +183,6 @@ class HDatePicker extends StatelessWidget {
   }
 }
 
-// List<SubTask> getSubTasksForTimetable() {
-//   List<SubTask> subtasks = [];
-//   final DateTime today = DateTime.now();
-//   final DateTime startTime =
-// } //ef
-
 List<Event> convertSubtaskToEvent(List<SubTask> subtasks) {
   List<Event> events = [];
   for (SubTask subtask in subtasks) {

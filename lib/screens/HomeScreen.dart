@@ -105,6 +105,8 @@ class HomeScreen extends StatelessWidget {
                             itemCount: store.tasks.length,
                             itemBuilder: (BuildContext context, int index) {
                               Task task = store.tasks[index];
+                              List<Employee> assignedEmployees =
+                                  store.getAssignedEmployeesByTask(task.id);
                               return GestureDetector(
                                 onTap: () {
                                   //move to new creen
@@ -200,14 +202,14 @@ class HomeScreen extends StatelessWidget {
                                               child: ListView.builder(
                                                 scrollDirection:
                                                     Axis.horizontal,
-                                                itemCount: task.assignedPeople
+                                                itemCount: assignedEmployees
                                                             .length <=
                                                         3
-                                                    ? task.assignedPeople.length
+                                                    ? assignedEmployees.length
                                                     : 4,
                                                 itemBuilder: (context, index) {
-                                                  Employee assignee = task
-                                                      .assignedPeople[index];
+                                                  Employee assignee =
+                                                      assignedEmployees[index];
                                                   if (index < 3) {
                                                     return Align(
                                                       widthFactor: 0.65,
@@ -234,7 +236,7 @@ class HomeScreen extends StatelessWidget {
                                                             AppColor.white,
                                                         radius: 15,
                                                         child: Text(
-                                                          "+${task.assignedPeople.length - 3}",
+                                                          "+${assignedEmployees.length - 3}",
                                                           style:
                                                               const TextStyle(
                                                             fontSize: 14,
@@ -253,7 +255,7 @@ class HomeScreen extends StatelessWidget {
                                       ),
                                       ProgressCircle(
                                         taskProgress:
-                                            store.calTaskProgress(task),
+                                            store.calTaskProgress(task.id),
                                         radius: 30,
                                         fontSize: 14,
                                       ),
@@ -288,25 +290,31 @@ class HomeScreen extends StatelessWidget {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     //intro
                     Text(
-                      "Hi! Linrada",
+                      "Hi! ${store.user.name}",
                       style: AppStyle.mainHeading,
                     ),
                     //role
                     Text(
-                      "Project Manager",
-                      style: TextStyle(
+                      store.user.role,
+                      style: const TextStyle(
                         color: AppColor.white,
                       ),
                     ),
                   ],
                 ),
-                const Icon(
-                  Icons.account_circle,
-                  color: AppColor.white,
-                  size: 50,
+                GestureDetector(
+                  onTap: () async {
+                    // await store.insertSubtask(
+                    //     store.tasks[0].id, store.tasks[0].subTasks[0]);
+                  },
+                  child: const Icon(
+                    Icons.account_circle,
+                    color: AppColor.white,
+                    size: 50,
+                  ),
                 )
               ],
             ),

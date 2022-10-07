@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:task_management_application/models/AssignedEmployee.dart';
 import 'package:task_management_application/models/Employee.dart';
 import 'package:task_management_application/models/SubTask.dart';
 import 'package:task_management_application/screens/CreateTaskScreen.dart';
@@ -19,19 +20,7 @@ import 'models/Task.dart';
 import 'screens/HomeScreen.dart';
 
 class Store extends ChangeNotifier {
-  String connectionUrl = "http://172.20.10.9:1880";
-
-  //employees
-  List<Employee> _employees = [];
-  List<Employee> get employees => _employees;
-
-  //available employees
-  List<Employee> _availableEmployees = [];
-  List<Employee> get availableEmployees => _availableEmployees;
-
-  //displayedEmployees
-  List<Employee> _displayedEmployees = [];
-  List<Employee> get displayedEmployees => _displayedEmployees;
+  String connectionUrl = "http://192.168.182.224:1880";
 
   //tasks
   List<Task> _tasks = [];
@@ -52,7 +41,7 @@ class Store extends ChangeNotifier {
     } //end if else
   } //ef
 
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime.utc(1956);
   DateTime get selectedDate => _selectedDate;
   String _key = "";
   String _selectedTaskStatus = "All";
@@ -90,11 +79,78 @@ class Store extends ChangeNotifier {
     _displayedEmployees = displayedEmployees;
   }
 
+  //employees
+  List<Employee> _employees = [];
+  List<Employee> get employees => _employees;
+
+  //available employees
+  List<Employee> _availableEmployees = [];
+  List<Employee> get availableEmployees {
+    List<Employee> employees = [];
+    return [];
+  }
+
+  //displayedEmployees
+  List<Employee> _displayedEmployees = [];
+  List<Employee> get displayedEmployees => _displayedEmployees;
+
+  List<AssignedEmployee> _assignedEmployee = [];
+  List<AssignedEmployee> get assignedEmployee => _assignedEmployee;
+
+  void setAssignedEmployee(List<AssignedEmployee> assignedEmployees) {
+    _assignedEmployee = assignedEmployees;
+  }
+
+  Future<List<AssignedEmployee>> getAssignedEmployees() async {
+    if (_assignedEmployee.isEmpty) {
+      var url = "$connectionUrl/assignedemployeehandle";
+      var jsonText = await get(url);
+      var dict = json.decode(jsonText) as List;
+      List<AssignedEmployee> assignedEmployees =
+          dict.map((e) => AssignedEmployee.fromMap(e)).toList();
+      setAssignedEmployee(assignedEmployees);
+      notifyListeners();
+      return _assignedEmployee;
+    } //end if
+    return _assignedEmployee;
+  }
+
+  List<Employee> getAssignedEmployeesByTask(int taskId) {
+    List<Employee> employees = [];
+    for (AssignedEmployee ae in _assignedEmployee) {
+      if (ae.taskId == taskId) {
+        Employee? employee =
+            _employees.firstWhereOrNull((e) => e.id == ae.employeeId);
+        if (employee != null) {
+          employees.add(employee);
+        }
+      }
+    }
+    return employees;
+  } //ef
+
+  List<Employee> getAvailableEmployeesByTask(int taskId) {
+    List<Employee> employees = [];
+    List<AssignedEmployee> aeById = [];
+    for (AssignedEmployee ae in _assignedEmployee) {
+      if (ae.taskId == taskId) {
+        aeById.add(ae);
+      }
+    }
+    for (Employee employee in _employees) {
+      var found = aeById.firstWhereOrNull((e) => e.employeeId == employee.id);
+      if (found == null) {
+        employees.add(employee);
+      }
+    }
+    return employees;
+  } //ef
+
   Future<List<Employee>> getEmployees() async {
     if (_employees.isEmpty) {
-      var url = "$connectionUrl/taskmanagement";
+      var url = "$connectionUrl/employeehandle";
       var jsonText = await get(url);
-      var dict = json.decode(jsonText)["employees"] as List;
+      var dict = json.decode(jsonText) as List;
       List<Employee> employees = dict.map((e) => Employee.fromMap(e)).toList();
       setEmployees(employees);
       notifyListeners();
@@ -115,6 +171,7 @@ class Store extends ChangeNotifier {
         _availableEmployees.add(employee);
       } //end if
     } //end loop
+    // print(_availableEmployees);
   } //ef
   //end employee region
 
@@ -123,31 +180,105 @@ class Store extends ChangeNotifier {
   } //ef
 
   Future<List<Task>> getTasks({refresh = false}) async {
+    var url = "$connectionUrl/taskhandle";
+
     if (_tasks.isEmpty || refresh) {
-      var url = "$connectionUrl/taskmanagement";
-      var jsonText = await get(url);
-      var dict = json.decode(jsonText)["tasks"] as List;
+      var data = {
+        "operation": "query",
+      };
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-type': 'application/json'},
+        body: json.encode(data),
+      );
+      var result = response.body;
+      var dict = json.decode(result) as List;
+
+      // var jsonText = await get(url);
+      // var dict = json.decode(jsonText)["tasks"] as List;
       List<Task> tasks = dict.map((e) => Task.fromMap(e)).toList();
+      List<SubTask> subtasks = await getSubtasksDb();
+      //get employees in this process also
+      List<Employee> employees = await getEmployees();
+      List<AssignedEmployee> assignedEmployees = await getAssignedEmployees();
+
+      //set
       setTasks(tasks);
+      setSubtasks(subtasks);
+      setEmployees(employees);
+      setAssignedEmployee(assignedEmployees);
       notifyListeners();
       return _tasks;
     }
     return _tasks;
   } //ef
 
+  int _taskId = -1;
+  void setTaskId(int id) {
+    _taskId = id;
+  } //ef
+
+  bool _firstLoadSubtasks = true;
+
   List<SubTask> _subtasks = [];
   List<SubTask> get subtasks {
-    if (_selectedDate == DateTime.utc(1956)) {
+    if (_selectedDate != DateTime.utc(1956)) {
+      return getSubTaskByDate(_selectedDate);
+    } else if (_taskId == -1) {
       return _subtasks;
     } else {
-      return getSubTaskByDate(_selectedDate);
+      return getSubtasksById(_taskId);
     }
   } //ef
+
+  void setSubtasks(List<SubTask> subtasks) {
+    _subtasks = subtasks;
+    notifyListeners();
+  } //ef
+
+  Future<List<SubTask>> getSubtasksDb() async {
+    if (_subtasks.isEmpty) {
+      var url = "$connectionUrl/subtaskhandle";
+      var data = {
+        // "taskId": _taskId,
+        "operation": "query",
+      };
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-type': 'application/json'},
+        body: json.encode(data),
+      );
+      var result = response.body;
+      var dict = json.decode(result) as List;
+      List<SubTask> subtaskList = dict.map((e) => SubTask.fromMap(e)).toList();
+      for (Task task in _tasks) {
+        for (SubTask subtask in subtaskList) {
+          if (task.id == subtask.taskId) {
+            subtasks.add(subtask);
+          }
+        }
+      } //
+      setSubtasks(subtaskList);
+      notifyListeners();
+      return _subtasks;
+    } //end if
+    return _subtasks;
+  } //ef
+
+  List<SubTask> getSubtasksById(int id) {
+    List<SubTask> subtasks = [];
+    for (SubTask subtask in _subtasks) {
+      if (subtask.taskId == id) {
+        subtasks.add(subtask);
+      }
+    }
+    return subtasks;
+  }
 
   List<SubTask> getAllSubtasks() {
     List<SubTask> subtasks = [];
     for (Task task in _tasks) {
-      for (SubTask subtask in task.subTasks) {
+      for (SubTask subtask in subtasks) {
         subtasks.add(subtask);
       } //eloop subtasks
     } //eloop tasks
@@ -157,26 +288,52 @@ class Store extends ChangeNotifier {
   //get subtasks on calendar screen
   List<SubTask> getSubTaskByDate(DateTime date) {
     List<SubTask> subtasks = [];
-    for (Task task in _tasks) {
-      for (SubTask subtask in task.subTasks) {
-        bool sameDate =
-            AppStyle.dateFormatter.format(DateTime.parse(subtask.datetime)) ==
-                AppStyle.dateFormatter.format(date);
-        if (sameDate) {
-          subtasks.add(subtask);
-        } //end if
-      } //eloop subtasks
-    } //eloop tasks
+    for (SubTask subtask in _subtasks) {
+      bool sameDate =
+          AppStyle.dateFormatter.format(DateTime.parse(subtask.datetime)) ==
+              AppStyle.dateFormatter.format(date);
+      if (sameDate) {
+        subtasks.add(subtask);
+      }
+    }
     return subtasks;
   } //ef
 
-  double calTaskProgress(Task task) {
+  Future<void> insertSubtask(SubTask subtask, String insertType) async {
+    if (insertType != "temp") {
+      var url = "$connectionUrl/subtaskhandle";
+      var dict = {
+        "subtask": subtask.toMap(),
+        "operation": "insert",
+      };
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-type': 'application/json'},
+        body: json.encode(dict),
+      );
+    }
+    //add to existing subtask
+    _subtasks.add(subtask);
+    notifyListeners();
+  } //ef
+
+  void removeSubtask(SubTask subtask) {
+    _subtasks.removeWhere((element) => element.id == subtask.id);
+    notifyListeners();
+  }
+
+  //end subtask region
+
+  double calTaskProgress(int taskId) {
     int completeCount = 0;
-    int totalSubtask = task.subTasks.length;
-    for (SubTask subTask in task.subTasks) {
-      if (subTask.complete == true) {
-        completeCount += 1;
-      } //end if
+    int totalSubtask = 0;
+    for (SubTask subtask in _subtasks) {
+      if (subtask.taskId == taskId) {
+        totalSubtask += 1;
+        if (subtask.complete == true) {
+          completeCount += 1;
+        } //end if
+      }
     } //eloop
     return (completeCount / totalSubtask);
   } //ef
@@ -219,6 +376,8 @@ class Store extends ChangeNotifier {
   int get bottomNavIndex => _bottomNavIndex;
 
   void setTabChange(int tabIndex) {
+    //reset date
+    _selectedDate = DateTime.utc(1956);
     _bottomNavIndex = tabIndex;
     notifyListeners();
   } //ef
@@ -227,6 +386,15 @@ class Store extends ChangeNotifier {
     Icons.home,
     Icons.calendar_today,
   ];
+
+  //login user
+  Employee? _user = null;
+  Employee get user => _user!;
+
+  void setUser(Employee user) {
+    _user = user;
+    notifyListeners();
+  } //ef
 } //ec
 
 main() {
@@ -255,32 +423,34 @@ class AppMain extends StatelessWidget {
     bool showFloatingBtn = MediaQuery.of(context).viewInsets.bottom != 0;
     return Scaffold(
       body: store._tabs[store._bottomNavIndex],
-      floatingActionButton: Visibility(
-        visible: !showFloatingBtn,
-        child: CircleAvatar(
-          backgroundColor: AppColor.white,
-          radius: 38,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: FloatingActionButton(
-              onPressed: () {
-                //move to new creen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CreateTaskScreen(),
+      floatingActionButton: store.user.role.toLowerCase() == "manager"
+          ? Visibility(
+              visible: !showFloatingBtn,
+              child: CircleAvatar(
+                backgroundColor: AppColor.white,
+                radius: 38,
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      //move to new creen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CreateTaskScreen(),
+                        ),
+                      );
+                    },
+                    backgroundColor: AppColor.primaryColor,
+                    child: const Icon(
+                      Icons.add,
+                      size: 35,
+                    ),
                   ),
-                );
-              },
-              backgroundColor: AppColor.primaryColor,
-              child: const Icon(
-                Icons.add,
-                size: 35,
+                ),
               ),
-            ),
-          ),
-        ),
-      ),
+            )
+          : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
         backgroundColor: AppColor.primaryColor,
@@ -303,4 +473,4 @@ class AppMain extends StatelessWidget {
       ),
     );
   } //ef
-}//ec
+} //ec

@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 
@@ -36,11 +37,11 @@ class TaskScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
     var store = Provider.of<Store>(context);
+    store.setTaskId(task.id);
     //for status dropdown
     List<String> statusTypes = Status.getStatusTypes();
     Status? selectedStatus = Status.getStatus(task.status);
     String? selectedValue = selectedStatus!.status;
-    double taskProgress = store.calTaskProgress(task);
     TextEditingController subTaskNameController = TextEditingController();
     return Scaffold(
       body: SingleChildScrollView(
@@ -172,10 +173,15 @@ class TaskScreen extends StatelessWidget {
                                                 ),
                                               )
                                               .toList(),
-                                          onChanged: (value) {
-                                            task.status = value.toString();
-                                            store.update();
-                                          },
+                                          onChanged:
+                                              store.user.role.toLowerCase() ==
+                                                      "manager"
+                                                  ? (value) {
+                                                      task.status =
+                                                          value.toString();
+                                                      store.update();
+                                                    }
+                                                  : null,
                                           buttonPadding:
                                               const EdgeInsets.only(top: 1),
                                           buttonWidth: 115,
@@ -191,7 +197,7 @@ class TaskScreen extends StatelessWidget {
                             ],
                           ),
                           ProgressCircle(
-                            taskProgress: taskProgress,
+                            taskProgress: store.calTaskProgress(task.id),
                             radius: 40,
                             fontSize: 18,
                           ),
@@ -228,6 +234,7 @@ class TaskScreen extends StatelessWidget {
                       store: store,
                       screenSize: screenSize,
                       subTaskNameController: subTaskNameController,
+                      insertType: "not temp",
                     ),
                   ],
                 ),
@@ -247,12 +254,14 @@ class SubtaskWidget extends StatelessWidget {
     required this.store,
     required this.screenSize,
     required this.subTaskNameController,
+    required this.insertType,
   }) : super(key: key);
 
   final Task task;
   final Store store;
   final Size screenSize;
   final TextEditingController subTaskNameController;
+  final String insertType;
 
   @override
   Widget build(BuildContext context) {
@@ -272,6 +281,7 @@ class SubtaskWidget extends StatelessWidget {
           store: store,
           screenSize: screenSize,
           subTaskNameController: subTaskNameController,
+          insertType: insertType,
         ),
       ],
     );
@@ -285,12 +295,14 @@ class AddSubtask extends StatelessWidget {
     required this.subTaskNameController,
     required this.task,
     required this.store,
+    required this.insertType,
   }) : super(key: key);
 
   final Size screenSize;
   final TextEditingController subTaskNameController;
   final Task task;
   final Store store;
+  final String insertType;
 
   @override
   Widget build(BuildContext context) {
@@ -401,7 +413,7 @@ class AddSubtask extends StatelessWidget {
                           press: () async {
                             if (subTaskNameController.text.isNotEmpty) {
                               SubTask newSubTask = SubTask(
-                                id: task.subTasks.length + 1,
+                                id: store.subtasks.length + 1,
                                 name: subTaskNameController.text,
                                 complete: false,
                                 datetime: AppStyle.dateTimeFormatter.format(
@@ -412,8 +424,10 @@ class AddSubtask extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                taskId: task.id,
                               );
-                              task.subTasks.add(newSubTask);
+                              // store.subtasks.add(newSubTask);
+                              store.insertSubtask(newSubTask, insertType);
                               store.update();
                               //show confirmation dialog
                               await showDialog(
@@ -490,77 +504,105 @@ class SubtaskListView extends StatelessWidget {
     required this.store,
     required this.screenSize,
     required this.subTaskNameController,
+    required this.insertType,
   }) : super(key: key);
 
   final Task task;
   final Store store;
   final Size screenSize;
   final TextEditingController subTaskNameController;
+  final String insertType;
 
   @override
   Widget build(BuildContext context) {
+    var store = Provider.of<Store>(context);
     return SizedBox(
       height:
-          task.subTasks.length >= 3 ? 350 : (100 * task.subTasks.length + 60),
+          store.subtasks.length >= 3 ? 350 : (100 * store.subtasks.length + 60),
       child: ListView.separated(
         padding: EdgeInsets.zero,
         separatorBuilder: (context, index) => const SizedBox(
           height: 10,
         ),
-        itemCount: task.subTasks.length + 1,
+        itemCount: store.subtasks.length + 1,
         itemBuilder: (BuildContext context, int index) {
-          if (index < task.subTasks.length) {
-            SubTask subTask = task.subTasks[index];
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
-              decoration: BoxDecoration(
-                color: subTask.complete
-                    ? AppColor.primaryGreen
-                    : AppColor.primaryYellow,
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(20),
-                ),
+          if (index < store.subtasks.length) {
+            SubTask subTask = store.subtasks[index];
+            return Slidable(
+              key: UniqueKey(),
+              endActionPane: ActionPane(
+                motion: const ScrollMotion(),
+                children: [
+                  SlidableAction(
+                    backgroundColor: Color(0xFFFE4A49),
+                    foregroundColor: Colors.white,
+                    icon: Icons.delete,
+                    label: 'Delete',
+                    onPressed: (context) {
+                      store.removeSubtask(subTask);
+                    },
+                  ),
+                ],
               ),
-              child: CheckboxListTile(
-                side: const BorderSide(
-                  color: AppColor.white,
-                  width: 3,
-                ),
-                checkColor: AppColor.black,
-                activeColor: AppColor.white,
-                checkboxShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: AppStyle.defaultPadding * 0.1),
-                value: subTask.complete,
-                title: Text(
-                  subTask.name,
-                  style: AppStyle.semiBoldWhiteText,
-                ),
-                subtitle: Text(
-                  "Date: ${subTask.datetime}",
-                  style: const TextStyle(
-                    color: AppColor.white,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: subTask.complete
+                      ? AppColor.primaryGreen
+                      : AppColor.primaryYellow,
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(20),
                   ),
                 ),
-                onChanged: (bool? value) {
-                  subTask.complete = value!;
-                  store.update();
-                },
+                child: CheckboxListTile(
+                  side: const BorderSide(
+                    color: AppColor.white,
+                    width: 3,
+                  ),
+                  checkColor: AppColor.black,
+                  activeColor: AppColor.white,
+                  checkboxShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: AppStyle.defaultPadding * 0.1),
+                  value: subTask.complete,
+                  title: Text(
+                    subTask.name,
+                    style: AppStyle.semiBoldWhiteText,
+                  ),
+                  subtitle: Text(
+                    "Date: ${subTask.datetime}",
+                    style: const TextStyle(
+                      color: AppColor.white,
+                    ),
+                  ),
+                  onChanged: store.user.role.toLowerCase() == "manager"
+                      ? (bool? value) {
+                          subTask.complete = value!;
+                          store.update();
+                        }
+                      : null,
+                ),
               ),
             );
           } else {
-            return Align(
-              alignment: Alignment.topLeft,
-              child: AddSubtask(
-                screenSize: screenSize,
-                subTaskNameController: subTaskNameController,
-                task: task,
-                store: store,
-              ),
-            );
+            if (store.user.role.toLowerCase() == "manager") {
+              return Align(
+                alignment: Alignment.topLeft,
+                child: AddSubtask(
+                  screenSize: screenSize,
+                  subTaskNameController: subTaskNameController,
+                  task: task,
+                  store: store,
+                  insertType: insertType,
+                ),
+              );
+            } else {
+              return Container();
+            }
           }
         },
       ),

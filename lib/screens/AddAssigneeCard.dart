@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_management_application/components/LongButton.dart';
+import 'package:task_management_application/models/AssignedEmployee.dart';
 import 'package:task_management_application/models/Employee.dart';
 import 'package:task_management_application/styles/AppColor.dart';
 import 'package:task_management_application/styles/AppStyle.dart';
@@ -26,16 +27,18 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
 
   late Store store;
 
-  List<Employee> displayedEmployees = [];
+  List<Employee> availableEmployees = [];
 
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
     store = Provider.of<Store>(context);
-    //get available employees
-    store.getAvailableEmployees(widget.task.assignedPeople);
+    // //get available employees
+    List<Employee> assignedEmployees =
+        store.getAssignedEmployeesByTask(widget.task.id);
+    // store.getAvailableEmployees(assignedEmployees);
     if (searchBox.text.isEmpty) {
-      displayedEmployees = store.availableEmployees;
+      availableEmployees = store.getAvailableEmployeesByTask(widget.task.id);
     }
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -78,9 +81,9 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
                         separatorBuilder: (context, index) => const SizedBox(
                           height: 10,
                         ),
-                        itemCount: widget.task.assignedPeople.length,
+                        itemCount: assignedEmployees.length,
                         itemBuilder: (context, i) {
-                          Employee assignee = widget.task.assignedPeople[i];
+                          Employee assignee = assignedEmployees[i];
                           return Slidable(
                             key: UniqueKey(),
                             endActionPane: ActionPane(
@@ -121,7 +124,7 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
                       controller: searchBox,
                       style: TextStyle(color: Colors.grey[800]),
                       onChanged: (String text) {
-                        getDisplayedEmployees(text);
+                        getavailableEmployees(text);
                       },
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(
@@ -156,14 +159,14 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
                                 const SizedBox(
                               height: 10,
                             ),
-                            itemCount: displayedEmployees.length,
+                            itemCount: availableEmployees.length,
                             itemBuilder: (BuildContext context, int i) {
-                              Employee employee = displayedEmployees[i];
+                              Employee employee = availableEmployees[i];
                               return EmployeeListTile(
                                 employee: employee,
                                 icon: GestureDetector(
                                   onTap: () {
-                                    addAssignees(store.availableEmployees[i]);
+                                    addAssignees(availableEmployees[i]);
                                   },
                                   child: const CircleAvatar(
                                     backgroundColor: AppColor.primaryColor,
@@ -199,30 +202,30 @@ class _AddAssigneeCardState extends State<AddAssigneeCard> {
     store.availableEmployees.add(
       employee,
     );
-    widget.task.assignedPeople.remove(
-      employee,
-    );
+    store.assignedEmployee.removeWhere((e) => e.employeeId == employee.id);
     store.update();
   } //ef
 
   void addAssignees(Employee employee) {
-    widget.task.assignedPeople.add(
-      employee,
-    );
+    store.assignedEmployee.add(AssignedEmployee(
+      id: store.assignedEmployee.length + 1,
+      taskId: widget.task.id,
+      employeeId: employee.id,
+    ));
     store.availableEmployees.remove(
       employee,
     );
     store.update();
   }
 
-  void getDisplayedEmployees(String searchedName) {
-    List<Employee> searchedEmployees = store.availableEmployees.where((e) {
+  void getavailableEmployees(String searchedName) {
+    List<Employee> searchedEmployees = availableEmployees.where((e) {
       final employeeName = e.name.toLowerCase();
       final query = searchedName.toLowerCase();
       return employeeName.contains(query);
     }).toList();
     setState(() {
-      displayedEmployees = searchedEmployees;
+      availableEmployees = searchedEmployees;
     });
   } //ef
 }
