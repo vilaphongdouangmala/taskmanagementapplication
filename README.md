@@ -1,4 +1,5 @@
 <h1>User Interfaces Preview</h1>
+<hr>
 <img width="246" alt="s1" src="https://user-images.githubusercontent.com/101310686/201329288-1a67acc1-370e-4deb-8ba2-af9d7882ec54.png">
 <img width="246" alt="s2" src="https://user-images.githubusercontent.com/101310686/201329299-27d0014d-678c-408d-a012-39bd3a6af797.png">
 <img width="243" alt="s3" src="https://user-images.githubusercontent.com/101310686/201329305-a4beeed3-a12e-4b78-adfb-021687f00bf5.png">
