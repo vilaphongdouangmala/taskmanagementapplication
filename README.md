@@ -1,19 +1,10 @@
-# task_management_application
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-
-<img width="242" alt="image" src="https://user-images.githubusercontent.com/101310686/201329109-98714647-465f-41a3-8d18-07e9dba48d9c.png">
+<h1>User Interfaces Preview</h1>
+<hr>
+<img width="353" alt="s1" src="https://user-images.githubusercontent.com/101310686/201329288-1a67acc1-370e-4deb-8ba2-af9d7882ec54.png">
+<img width="349" alt="s2" src="https://user-images.githubusercontent.com/101310686/201329299-27d0014d-678c-408d-a012-39bd3a6af797.png">
+<img width="243" alt="s3" src="https://user-images.githubusercontent.com/101310686/201329305-a4beeed3-a12e-4b78-adfb-021687f00bf5.png">
+<img width="246" alt="s4" src="https://user-images.githubusercontent.com/101310686/201329315-50100843-3dc0-4aa7-a9ee-928cbfd3cc91.png">
+<img width="242" alt="s5" src="https://user-images.githubusercontent.com/101310686/201329318-ea7d550e-3214-4fcf-9b6a-45bbe7dc07b2.png">
+<img width="240" alt="s6" src="https://user-images.githubusercontent.com/101310686/201329333-a752bdcd-61e6-4eba-afe6-939a197e4714.png">
+<img width="245" alt="s7" src="https://user-images.githubusercontent.com/101310686/201329357-ce921186-496c-460a-ad2b-96b32791a147.png">
+<img width="242" alt="s8" src="https://user-images.githubusercontent.com/101310686/201329359-1de000d8-2cb0-45b0-9fa3-b74cc4444959.png">
